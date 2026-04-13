@@ -42,6 +42,8 @@ model User {
   code       String?
   expiresAt  DateTime?
   tokens     RefreshToken[]
+
+  @@map("users")
 }
 
 model RefreshToken {
@@ -53,6 +55,8 @@ model RefreshToken {
   createdAt DateTime @default(now())
   userId    Int
   user      User     @relation(fields: [userId], references: [id])
+
+  @@map("refresh_tokens")
 }
 
 model ParkingLot {
@@ -62,6 +66,8 @@ model ParkingLot {
 
   devices IoTDevice[]
   slots   ParkingSlot[]
+
+  @@map("parking_lots")
 }
 
 model IoTDevice {
@@ -74,6 +80,7 @@ model IoTDevice {
   slots ParkingSlot[]
 
   @@index([lotId])
+  @@map("iot_devices")
 }
 
 model ParkingSlot {
@@ -97,4 +104,5 @@ model ParkingSlot {
   @@index([status])
   @@index([lotId])
   @@index([deviceMac])
+  @@map("parking_slots")
 }

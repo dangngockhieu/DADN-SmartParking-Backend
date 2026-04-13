@@ -4,7 +4,6 @@ import { UserService } from './user.service';
 import { ChangePasswordDTO, ChangeRoleDTO, CreateUserDTO } from './dto';
 import { Role } from '@prisma/client';
 import { Roles } from '../../authentication/auth/decorators/roles';
-import { Public } from '../../authentication/auth/decorators/customize';
 
 @Controller('users')
 export class UserController {
@@ -35,7 +34,6 @@ export class UserController {
 
   // Create User By Admin
   @Post()
-  @Public()
   @Roles(Role.ADMIN)
   async createUserByAdmin(@Body() dto: CreateUserDTO) {
     await this.userService.createUserForAdmin(dto);
