@@ -1,4 +1,4 @@
-import { ChangePasswordDTO, ChangeRoleDTO, CreateUserDTO } from './dto/global.dto';
+import { ChangePasswordDTO, ChangeRoleDTO, CreateUserDTO } from './dto/user.dto';
 import { Injectable } from '@nestjs/common';
 import * as argon from 'argon2';
 import { PrismaService } from '../../prisma/prisma.service';
