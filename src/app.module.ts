@@ -1,12 +1,14 @@
 import { Module } from '@nestjs/common';
-import { AuthModule } from './auth/auth.module';
-import { MailModule } from './mail/mail.module';
+import { AuthModule } from './authentication/auth/auth.module';
+import { MailModule } from './authentication/mail/mail.module';
+import { TokensModule } from './authentication/tokens/tokens.module';
 import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { PrismaModule } from './prisma/prisma.module';
 import { ParkingLotModule } from './modules/parking_lot/parking_lot.module';
 import { ParkingSlotModule } from './modules/parking_slot/parking_slot.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
@@ -19,8 +21,10 @@ import { ParkingSlotModule } from './modules/parking_slot/parking_slot.module';
     PrismaModule,
     ParkingLotModule,
     ParkingSlotModule,
+    UserModule,
     AuthModule,
-    MailModule
+    MailModule,
+    TokensModule
   ]
 })
 export class AppModule {}
