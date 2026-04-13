@@ -9,6 +9,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ParkingLotModule } from './modules/parking_lot/parking_lot.module';
 import { ParkingSlotModule } from './modules/parking_slot/parking_slot.module';
 import { UserModule } from './modules/user/user.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './authentication/auth/guards';
 
 @Module({
   imports: [
@@ -25,6 +27,12 @@ import { UserModule } from './modules/user/user.module';
     AuthModule,
     MailModule,
     TokensModule
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    }
   ]
 })
 export class AppModule {}
