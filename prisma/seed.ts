@@ -1,15 +1,16 @@
-import { PrismaClient, Role, SlotStatus, DeviceStatus } from '@prisma/client';
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from '../src/app.module';
+import { PrismaService } from '../src/prisma/prisma.service';
+import { SlotStatus, DeviceStatus, Role } from '@prisma/client';
 import * as argon from 'argon2';
 
-const prisma = new PrismaClient();
-
-async function main() {
-  // 1. Create admin user
+async function seed(prisma: PrismaService) {
+  // 1. Admin
   const hashedPassword = await argon.hash('123456');
 
   const admin = await prisma.user.upsert({
     where: { email: 'admin@gmail.com' },
-    update: {},
+    update: {}, // có rồi thì bỏ qua
     create: {
       firstName: 'Admin',
       lastName: 'System',
@@ -21,11 +22,11 @@ async function main() {
     },
   });
 
-  console.log('✅ Admin created:', admin.email);
+  console.log('✅ Admin:', admin.email);
 
-  // 2. Create Parking Lot A
+  // 2. Parking Lot A
   const lotA = await prisma.parkingLot.upsert({
-    where: { id: 1 },
+    where: { id: 1 }, // hoặc bạn có thể dùng unique name nếu có
     update: {},
     create: {
       name: 'A',
@@ -33,9 +34,9 @@ async function main() {
     },
   });
 
-  console.log('✅ Parking lot created:', lotA.name);
+  console.log('✅ Lot:', lotA.name);
 
-  // 3. Create IoT Device (cần để gắn slot)
+  // 3. IoT Device
   const device = await prisma.ioTDevice.upsert({
     where: { macAddress: 'DEVICE_A_001' },
     update: {},
@@ -47,13 +48,11 @@ async function main() {
     },
   });
 
-  console.log('✅ Device created:', device.macAddress);
+  console.log('✅ Device:', device.macAddress);
 
-  // 4. Create 8 slots
-  const slots = [];
-
+  // 4. 8 Parking Slots
   for (let i = 1; i <= 8; i++) {
-    const slot = await prisma.parkingSlot.upsert({
+    await prisma.parkingSlot.upsert({
       where: {
         deviceMac_portNumber: {
           deviceMac: device.macAddress,
@@ -69,19 +68,23 @@ async function main() {
         status: SlotStatus.AVAILABLE,
       },
     });
-
-    slots.push(slot);
   }
 
-  console.log(`✅ Created ${slots.length} slots for lot A`);
+  console.log('✅ 8 slots created');
 }
 
-main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-    process.exit(1);
-  });
+async function bootstrap() {
+  const app = await NestFactory.createApplicationContext(AppModule);
+
+  const prisma = app.get(PrismaService);
+
+  try {
+    await seed(prisma);
+  } catch (e) {
+    console.error('❌ Seed error:', e);
+  } finally {
+    await app.close();
+  }
+}
+
+bootstrap();

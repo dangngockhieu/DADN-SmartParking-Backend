@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Req } from '@nestjs/common';
 import { Request } from "express";
 import { UserService } from './user.service';
 import { ChangePasswordDTO, ChangeRoleDTO, CreateUserDTO } from './dto';
@@ -55,9 +55,8 @@ export class UserController {
   // Change Role
   @Patch('change-role/:id')
   @Roles(Role.ADMIN)
-  async changeRole(@Req() req: Request, @Body() dto: ChangeRoleDTO) {
-    const email = (req.user as any)?.email;
-    await this.userService.changeRole(email, dto);
+  async changeRole(@Param('id', ParseIntPipe) id: number, @Body() dto: ChangeRoleDTO) {
+    await this.userService.changeRole(id, dto);
       return {
           message: 'Đổi vai trò thành công'
       };
