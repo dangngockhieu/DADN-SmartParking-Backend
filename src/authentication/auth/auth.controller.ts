@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as hbs from 'handlebars';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 const resolveVerifiedTemplatePath = () => {
   const candidates = [
@@ -21,6 +22,7 @@ const resolveVerifiedTemplatePath = () => {
   return matched ?? candidates[candidates.length - 1];
 };
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -79,6 +81,7 @@ export class AuthController {
 
   // LOGOUT
     @Post('logout')
+    @ApiBearerAuth('access-token')
     async logout(@Req() req: any, @Res({ passthrough: true }) res: Response) {
       const email = req.user?.email;
       if (!email) {

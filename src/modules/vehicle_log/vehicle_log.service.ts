@@ -28,4 +28,11 @@ export class VehicleLogService {
 			},
 		});
 	}
+
+	async getLogsBySlotId(slotId: number) {
+		return await this.prisma.vehicleLog.findMany({
+			where: { slotId },
+			orderBy: { createdAt: 'desc' },
+		});
+	}
 }

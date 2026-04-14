@@ -7,6 +7,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppExceptionFilter } from './common/filters/app.exception.filter';
 import { TransformInterceptor } from './common/filters/transform.interceptor';
 import { join } from 'path';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 const bootstrap = async() =>{
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useStaticAssets(join(__dirname, '..', '..', 'public'));
@@ -23,6 +24,30 @@ const bootstrap = async() =>{
   app.useGlobalFilters(new AppExceptionFilter());
 
   app.setGlobalPrefix('api/v1');
+
+  const config = new DocumentBuilder()
+    .setTitle('Parking Lot API')
+    .setDescription('API for managing parking lot system')
+    .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+    'access-token',
+    )
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  console.log('Swagger document created');
+  SwaggerModule.setup('docs', app, document, {
+    useGlobalPrefix: true,
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  });
+
 
   await app.listen(process.env.PORT ?? 8080);
   if (module.hot) {

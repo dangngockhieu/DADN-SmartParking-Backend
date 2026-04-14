@@ -30,6 +30,7 @@
     "@nestjs/passport": "11.0.5",
     "@nestjs/platform-express": "10.0.0",
     "@nestjs/serve-static": "5.0.5",
+    "@nestjs/swagger": "^7.4.2",
     "@prisma/client": "7.7.0",
     "argon2": "0.44.0",
     "class-transformer": "^0.5.1",
@@ -46,6 +47,7 @@
     "reflect-metadata": "0.1.13",
     "run-script-webpack-plugin": "0.2.3",
     "rxjs": "7.8.1",
+    "swagger-ui-express": "^5.0.1",
     "uuid": "13.0.0"
   },
   "devDependencies": {

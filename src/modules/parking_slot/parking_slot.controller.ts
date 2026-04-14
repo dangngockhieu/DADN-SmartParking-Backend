@@ -4,7 +4,9 @@ import { AdminUpdateParkingLotDTO, ChangeSlotDeviceDTO, CreateParkingSlotDTO, Se
 import { Roles } from '../../authentication/auth/decorators/roles';
 import { Role } from '@prisma/client';
 import { Public } from '../../authentication/auth/decorators/customize';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Parking Slots')
 @Controller('parking-slots')
 export class ParkingSlotController {
   constructor(private readonly parkingSlotService: ParkingSlotService) {}
@@ -12,6 +14,7 @@ export class ParkingSlotController {
   // Create parking slot
   @Post()
   @Roles(Role.ADMIN, Role.MANAGER)
+  @ApiBearerAuth('access-token')
   async createParkingSlot(@Body() dto: CreateParkingSlotDTO) {
     const newSlot = await this.parkingSlotService.createParkingSlot(dto);
     return {
@@ -24,6 +27,7 @@ export class ParkingSlotController {
 
   // Get parking slot by id
   @Get('/:id')
+  @ApiBearerAuth('access-token')
   async getParkingSlotById(@Param('id', ParseIntPipe) id: number) {
     const slot = await this.parkingSlotService.getSlotById(id);
     return {
@@ -37,6 +41,7 @@ export class ParkingSlotController {
   // Admin update parking slot status
   @Patch('/admin/:id')
   @Roles(Role.ADMIN, Role.MANAGER)
+  @ApiBearerAuth('access-token')
   async adminUpdateParkingSlotStatus(@Param('id', ParseIntPipe) id: number, @Body() dto: AdminUpdateParkingLotDTO) {
     const updatedSlot = await this.parkingSlotService.adminUpdateParkingSlotStatus(id, dto);
     return {
@@ -63,6 +68,7 @@ export class ParkingSlotController {
   // Change slot device
   @Patch('/:id/device')
   @Roles(Role.ADMIN, Role.MANAGER)
+  @ApiBearerAuth('access-token')
   async changeSlotDevice(@Param('id', ParseIntPipe) id: number, @Body() dto: ChangeSlotDeviceDTO) {
     await this.parkingSlotService.changeDevice(id, dto);
     return {

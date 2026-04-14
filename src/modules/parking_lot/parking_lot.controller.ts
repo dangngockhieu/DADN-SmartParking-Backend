@@ -3,13 +3,16 @@ import { ParkingLotService } from './parking_lot.service';
 import { CreateParkingLotDTO, UpdateParkingLotDTO } from './dto';
 import { Roles } from '../../authentication/auth/decorators/roles';
 import { Role } from '@prisma/client';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Parking Lots')
 @Controller('parking-lots')
 export class ParkingLotController {
   constructor(private readonly parkingLotService: ParkingLotService) {}
 
   @Post()
   @Roles(Role.ADMIN, Role.MANAGER)
+  @ApiBearerAuth('access-token')
   async createParkingLot(@Body() dto: CreateParkingLotDTO) {
     const createdLot = await this.parkingLotService.createParkingLot(dto);
     return {
@@ -21,6 +24,7 @@ export class ParkingLotController {
   }
 
   @Get()
+  @ApiBearerAuth('access-token')
   async getAllParkingLot() {
     const parkingLots = await this.parkingLotService.getAllParkingLot();
     return {
@@ -32,6 +36,7 @@ export class ParkingLotController {
   }
 
   @Get('/:id')
+  @ApiBearerAuth('access-token')
   async getParkingLotById(@Param('id', ParseIntPipe) id: number) {
     const parkingLot = await this.parkingLotService.getParkingLotById(id);
     return {
@@ -44,6 +49,7 @@ export class ParkingLotController {
 
   @Patch('/:id')
   @Roles(Role.ADMIN, Role.MANAGER)
+  @ApiBearerAuth('access-token')
   async updateParkingLot(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateParkingLotDTO) {
     const updatedLot = await this.parkingLotService.updateParkingLot(id, dto);
     return {

@@ -4,7 +4,9 @@ import { UserService } from './user.service';
 import { ChangePasswordDTO, ChangeRoleDTO, CreateUserDTO } from './dto';
 import { Role } from '@prisma/client';
 import { Roles } from '../../authentication/auth/decorators/roles';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Users')
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -12,6 +14,7 @@ export class UserController {
   // Get User With Paginateion
   @Get()
   @Roles(Role.ADMIN, Role.MANAGER)
+  @ApiBearerAuth('access-token')
   async getUserWithPaginate( @Req() req: Request) {
     const { page, limit, search } = req.query;
     const pageNumber = Number(page) || 1;
@@ -35,6 +38,7 @@ export class UserController {
   // Create User By Admin
   @Post()
   @Roles(Role.ADMIN)
+  @ApiBearerAuth('access-token')
   async createUserByAdmin(@Body() dto: CreateUserDTO) {
     await this.userService.createUserForAdmin(dto);
     return {
@@ -44,6 +48,7 @@ export class UserController {
 
   // Change Password
   @Patch('change-password')
+  @ApiBearerAuth('access-token')
   async changePassword(@Req() req: Request, @Body() dto:ChangePasswordDTO) {
     const email = (req.user as any)?.email;
     await this.userService.changePassword(email, dto);
@@ -55,6 +60,7 @@ export class UserController {
   // Change Role
   @Patch('change-role/:id')
   @Roles(Role.ADMIN)
+  @ApiBearerAuth('access-token')
   async changeRole(@Param('id', ParseIntPipe) id: number, @Body() dto: ChangeRoleDTO) {
     await this.userService.changeRole(id, dto);
       return {
