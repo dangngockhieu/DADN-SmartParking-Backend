@@ -13,6 +13,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards';
 import { SlotHistoryModule } from './modules/slot_history/slot_history.module';
 import { IotDeviceModule } from './modules/iot_device/iot_device.module';
+import { StatisticsModule } from './modules/statistics/statistics.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
@@ -38,8 +39,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
     TokensModule,
     SlotHistoryModule,
     IotDeviceModule,
-    ParkingLotModule,
-    ParkingSlotModule,
+    StatisticsModule,
   ],
   providers: [
     {
