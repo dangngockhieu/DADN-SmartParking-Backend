@@ -1,0 +1,205 @@
+package iot_gateway
+
+import (
+	"fmt"
+	"strings"
+	"time"
+
+	appErrors "backend/internal/common/errors"
+	"backend/internal/modules/gate"
+	"backend/internal/modules/parking_session"
+	"backend/internal/modules/rfid_card"
+)
+
+type Service struct {
+	plateCache     *PlateCache
+	gateService    *gate.Service
+	rfidService    *rfid_card.Service
+	sessionService *parking_session.Service
+}
+
+func NewService(
+	plateCache *PlateCache,
+	gateService *gate.Service,
+	rfidService *rfid_card.Service,
+	sessionService *parking_session.Service,
+) *Service {
+	return &Service{
+		plateCache:     plateCache,
+		gateService:    gateService,
+		rfidService:    rfidService,
+		sessionService: sessionService,
+	}
+}
+
+// HandleCameraPlate lưu biển số tạm trong PlateCache theo gateID
+func (s *Service) HandleCameraPlate(req *CameraPlateRequest) (*CameraPlateResponse, error) {
+	g, err := s.gateService.FindByID(req.GateID)
+	if err != nil {
+		if appErr, ok := err.(*appErrors.AppError); ok && appErr.StatusCode == 404 {
+			return &CameraPlateResponse{Success: false, Message: "Gate not found"}, nil
+		}
+		return nil, appErrors.NewInternal("Gate check error")
+	}
+	if !g.IsActive {
+		return &CameraPlateResponse{Success: false, Message: "Gate is inactive"}, nil
+	}
+
+	plateNumber := strings.TrimSpace(req.PlateNumber)
+	if plateNumber == "" {
+		return nil, appErrors.NewBadRequest("Plate number is required")
+	}
+
+	s.plateCache.Set(req.GateID, plateNumber)
+
+	return &CameraPlateResponse{
+		Success: true,
+		Message: "Plate saved from camera",
+	}, nil
+}
+
+// HandleRfidScan xử lý toàn bộ luồng khi ESP32 quẹt thẻ RFID
+func (s *Service) HandleRfidScan(req *RfidScanRequest) (*RfidScanResponse, error) {
+	// 1. Validate gate tồn tại và isActive
+	g, err := s.gateService.FindByID(req.GateID)
+	if err != nil {
+		if appErr, ok := err.(*appErrors.AppError); ok && appErr.StatusCode == 404 {
+			return rejectResponse("No gate"), nil
+		}
+		return nil, appErrors.NewInternal("Gate check error")
+	}
+	if !g.IsActive {
+		return rejectResponse("Gate off"), nil
+	}
+
+	// 2. Kiểm tra macAddress khớp với gate
+	if g.MacAddress != req.MacAddress {
+		return rejectResponse("MAC mismatch"), nil
+	}
+
+	// 3. Tìm thẻ RFID theo UID
+	card, err := s.rfidService.FindByUID(req.RfidUID)
+	if err != nil {
+		if appErr, ok := err.(*appErrors.AppError); ok && appErr.StatusCode == 404 {
+			return rejectResponse("Unknown card"), nil
+		}
+		return nil, appErrors.NewInternal("RFID check error")
+	}
+	if !card.IsActive {
+		return rejectResponse("Card disabled"), nil
+	}
+
+	// 4. Peek biển số từ PlateCache (CHỈ ĐỌC, chưa xóa)
+	plateNumber, ok := s.plateCache.Peek(req.GateID)
+	if !ok {
+		return rejectResponse("No plate"), nil
+	}
+
+	// 5. Xử lý theo loại cổng (consume xảy ra bên trong khi mọi thứ hợp lệ)
+	switch g.Type {
+	case gate.GateTypeEntry:
+		// Chỉ kiểm tra trùng biển số ở cổng VÀO
+		existingPlate, err := s.sessionService.FindActiveByPlateNumber(plateNumber)
+		if err == nil && existingPlate != nil {
+			return rejectResponse("Plate in use"), nil
+		}
+		return s.handleEntry(g, card, plateNumber)
+	case gate.GateTypeExit:
+		return s.handleExit(g, card, plateNumber)
+	default:
+		return rejectResponse("Bad gate type"), nil
+	}
+}
+
+// handleEntry xử lý xe vào
+func (s *Service) handleEntry(
+	g *gate.Gate,
+	card *rfid_card.RfidCard,
+	plateNumber string,
+) (*RfidScanResponse, error) {
+	// Kiểm tra không có session đang active với thẻ này
+	existing, err := s.sessionService.FindActiveByCardUID(card.UID)
+	if err == nil && existing != nil {
+		return rejectResponse("Card in use"), nil
+	}
+
+	// Mọi thứ hợp lệ → consume plate khỏi cache
+	s.plateCache.Consume(g.ID)
+
+	// Tạo session mới
+	_, err = s.sessionService.Create(parking_session.CreateParkingSessionInput{
+		LotID:       g.LotID,
+		CardUID:     card.UID,
+		CardType:    string(card.CardType),
+		PlateNumber: plateNumber,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &RfidScanResponse{
+		Success:  true,
+		Action:   "open_barrier",
+		LCDLine1: fmt.Sprintf("LP:%s", plateNumber),
+		LCDLine2: "Welcome!",
+		Message:  "Session created",
+	}, nil
+}
+
+// handleExit xử lý xe ra
+func (s *Service) handleExit(
+	g *gate.Gate,
+	card *rfid_card.RfidCard,
+	plateNumber string,
+) (*RfidScanResponse, error) {
+	// Tìm session đang active
+	session, err := s.sessionService.FindActiveByCardUID(card.UID)
+	if err != nil {
+		return rejectResponse("No session"), nil
+	}
+
+	// Mọi thứ hợp lệ → consume plate khỏi cache
+	s.plateCache.Consume(g.ID)
+
+	// Tính phí
+	fee := calculateFee(session)
+
+	// Kết thúc session
+	_, err = s.sessionService.FinishSession(parking_session.FinishParkingSessionInput{
+		SessionID: session.ID,
+		Fee:       fee,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &RfidScanResponse{
+		Success:  true,
+		Action:   "open_barrier",
+		LCDLine1: fmt.Sprintf("LP:%s", plateNumber),
+		LCDLine2: fmt.Sprintf("Fee:%.0fVND", fee),
+		Message:  "Session finished",
+	}, nil
+}
+
+// ─── helpers ─────────────────────────────────────────────────────────────────
+
+func rejectResponse(msg string) *RfidScanResponse {
+	return &RfidScanResponse{
+		Success:  false,
+		Action:   "reject",
+		LCDLine1: "REJECTED",
+		LCDLine2: msg,
+		Message:  msg,
+	}
+}
+
+// calculateFee tính phí đơn giản: 5000đ/giờ, tối thiểu 5000đ
+func calculateFee(session *parking_session.ParkingSession) float64 {
+	const ratePerHour = 5000.0
+	hours := time.Since(session.EntryTime).Hours()
+	if hours < 1 {
+		hours = 1
+	}
+	return hours * ratePerHour
+}
