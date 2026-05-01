@@ -50,7 +50,7 @@ func (s *Service) updateStatus(slot *ParkingSlot, newStatus SlotStatus) (*Update
 		NewStatus: newStatus,
 	}
 
-	s.hub.Broadcast("slotStatusUpdated", result)
+	s.hub.BroadcastToLot(slot.LotID, "slotStatusUpdated", result)
 
 	return result, nil
 }

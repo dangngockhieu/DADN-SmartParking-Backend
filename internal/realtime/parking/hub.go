@@ -2,17 +2,23 @@ package parking
 
 import (
 	"encoding/json"
+	"log"
 	"sync"
 )
-
-type Hub struct {
-	mu       sync.RWMutex
-	sessions map[Session]struct{}
-}
 
 type Session interface {
 	Send([]byte) error
 	Close() error
+}
+
+type Client struct {
+	LotID   uint
+	Session Session
+}
+
+type Hub struct {
+	mu      sync.RWMutex
+	clients map[Session]*Client
 }
 
 type EventEnvelope struct {
@@ -22,39 +28,70 @@ type EventEnvelope struct {
 
 func NewHub() *Hub {
 	return &Hub{
-		sessions: make(map[Session]struct{}),
+		clients: make(map[Session]*Client),
 	}
 }
 
-func (h *Hub) Add(s Session) {
+func (h *Hub) Add(client *Client) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
-	h.sessions[s] = struct{}{}
+
+	h.clients[client.Session] = client
 }
 
 func (h *Hub) Remove(s Session) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
-	delete(h.sessions, s)
+
+	delete(h.clients, s)
 }
 
-func (h *Hub) Broadcast(event string, data any) {
+func (h *Hub) BroadcastToLot(lotID uint, event string, data any) {
+	h.broadcast(event, data, func(client *Client) bool {
+		return client.LotID == lotID
+	})
+}
+
+func (h *Hub) BroadcastAll(event string, data any) {
+	h.broadcast(event, data, func(client *Client) bool {
+		return true
+	})
+}
+
+func (h *Hub) broadcast(event string, data any, filter func(*Client) bool) {
 	payload, err := json.Marshal(EventEnvelope{
 		Event: event,
 		Data:  data,
 	})
 	if err != nil {
+		log.Printf("[WT-HUB] marshal failed event=%s err=%v", event, err)
 		return
 	}
 
 	h.mu.RLock()
-	sessions := make([]Session, 0, len(h.sessions))
-	for s := range h.sessions {
-		sessions = append(sessions, s)
+
+	clients := make([]*Client, 0)
+
+	for _, client := range h.clients {
+		if filter(client) {
+			clients = append(clients, client)
+		}
 	}
+
 	h.mu.RUnlock()
 
-	for _, s := range sessions {
-		_ = s.Send(payload)
+	for _, client := range clients {
+		if err := client.Session.Send(payload); err != nil {
+			log.Printf(
+				"[WT-HUB] send failed lotID=%d event=%s err=%v",
+				client.LotID,
+				event,
+				err,
+			)
+
+			h.Remove(client.Session)
+			_ = client.Session.Close()
+			continue
+		}
 	}
 }

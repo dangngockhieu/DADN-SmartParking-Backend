@@ -4,7 +4,10 @@ import (
 	"context"
 	"crypto/tls"
 	"io"
+	"log"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/quic-go/quic-go/http3"
 	"github.com/quic-go/webtransport-go"
@@ -15,11 +18,15 @@ type wtSession struct {
 }
 
 func (s *wtSession) Send(data []byte) error {
-	str, err := s.session.OpenStreamSync(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	str, err := s.session.OpenStreamSync(ctx)
 	if err != nil {
 		return err
 	}
 	defer str.Close()
+
 	_, err = str.Write(data)
 	return err
 }
@@ -64,26 +71,56 @@ func (s *Server) Run(addr string) error {
 	s.server.H3.Addr = addr
 	s.server.H3.Handler = mux
 
+	log.Printf("WebTransport HTTP/3 server listening on %s", addr)
+
 	return s.server.ListenAndServe()
 }
 
 func (s *Server) handleUpgrade(w http.ResponseWriter, r *http.Request) {
+	lotIDStr := r.URL.Query().Get("lotId")
+	if lotIDStr == "" {
+		log.Println("WebTransport reject: missing lotId")
+		http.Error(w, "missing lotId", http.StatusBadRequest)
+		return
+	}
+
+	lotID64, err := strconv.ParseUint(lotIDStr, 10, 64)
+	if err != nil {
+		log.Println("WebTransport reject: invalid lotId:", lotIDStr)
+		http.Error(w, "invalid lotId", http.StatusBadRequest)
+		return
+	}
+
+	lotID := uint(lotID64)
+
 	sess, err := s.server.Upgrade(w, r)
 	if err != nil {
+		log.Println("WebTransport upgrade failed:", err)
 		return
 	}
 
 	go func(sess *webtransport.Session) {
 		ws := &wtSession{session: sess}
-		s.hub.Add(ws)
-		defer s.hub.Remove(ws)
-		defer sess.CloseWithError(0, "")
+
+		client := &Client{
+			LotID:   lotID,
+			Session: ws,
+		}
+
+		s.hub.Add(client)
+
+		defer func() {
+			s.hub.Remove(ws)
+			_ = sess.CloseWithError(0, "")
+		}()
 
 		for {
 			stream, err := sess.AcceptStream(context.Background())
 			if err != nil {
+				log.Println("WebTransport accept stream stopped:", err)
 				return
 			}
+
 			_, _ = io.Copy(io.Discard, stream)
 			_ = stream.Close()
 		}
