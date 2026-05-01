@@ -17,6 +17,14 @@ func NewHandler(service *Service) *Handler {
 	return &Handler{service: service}
 }
 
+// FindAll godoc
+// @Summary Lấy danh sách phiên gửi xe
+// @Description Trả về danh sách tất cả phiên gửi xe
+// @Tags parking_session
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Router /parking-sessions [get]
 func (h *Handler) FindAll(c *gin.Context) {
 	sessions, err := h.service.FindAll()
 	if err != nil {
@@ -27,6 +35,15 @@ func (h *Handler) FindAll(c *gin.Context) {
 	response.Success(c, 200, "Lấy danh sách phiên gửi xe thành công", sessions)
 }
 
+// FindByID godoc
+// @Summary Lấy chi tiết phiên gửi xe
+// @Description Lấy thông tin phiên gửi xe theo ID
+// @Tags parking_session
+// @Produce json
+// @Param id path int true "ID phiên gửi xe"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Router /parking-sessions/{id} [get]
 func (h *Handler) FindByID(c *gin.Context) {
 	id64, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
@@ -44,6 +61,14 @@ func (h *Handler) FindByID(c *gin.Context) {
 }
 
 // ForceClose closes a session by ID (for testing)
+// @Summary Đóng phiên gửi xe theo ID (test)
+// @Description Đóng phiên gửi xe theo ID, dùng cho testing
+// @Tags parking_session
+// @Produce json
+// @Param id path int true "ID phiên gửi xe"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Router /parking-sessions/{id} [delete]
 func (h *Handler) ForceClose(c *gin.Context) {
 	id64, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
@@ -64,6 +89,14 @@ func (h *Handler) ForceClose(c *gin.Context) {
 }
 
 // CloseByCard closes active session by card UID (for testing)
+// @Summary Đóng phiên gửi xe theo UID thẻ (test)
+// @Description Đóng phiên gửi xe đang active theo UID thẻ, dùng cho testing
+// @Tags parking_session
+// @Produce json
+// @Param uid path string true "UID thẻ"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Router /parking-sessions/card/{uid} [delete]
 func (h *Handler) CloseByCard(c *gin.Context) {
 	cardUID := c.Param("uid")
 	if cardUID == "" {
@@ -90,6 +123,14 @@ func (h *Handler) CloseByCard(c *gin.Context) {
 }
 
 // HardDelete permanently removes a session from DB
+// @Summary Xóa vĩnh viễn phiên gửi xe
+// @Description Xóa vĩnh viễn phiên gửi xe khỏi DB
+// @Tags parking_session
+// @Produce json
+// @Param id path int true "ID phiên gửi xe"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Router /parking-sessions/purge/{id} [delete]
 func (h *Handler) HardDelete(c *gin.Context) {
 	id64, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {

@@ -160,7 +160,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/resend-verification": {
+        "/auth/resend": {
             "post": {
                 "description": "Gửi lại email xác thực tài khoản",
                 "consumes": [
@@ -203,7 +203,7 @@ const docTemplate = `{
             }
         },
         "/auth/reset-password": {
-            "post": {
+            "patch": {
                 "description": "Đặt lại mật khẩu bằng mã xác thực hoặc token reset",
                 "consumes": [
                     "application/json"
@@ -286,7 +286,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/verify-email": {
+        "/auth/verify": {
             "get": {
                 "description": "Xác thực tài khoản bằng email và mã code từ link gửi qua email",
                 "produces": [
@@ -775,7 +775,7 @@ const docTemplate = `{
                     }
                 }
             },
-            "put": {
+            "patch": {
                 "security": [
                     {
                         "BearerAuth": []
@@ -876,6 +876,180 @@ const docTemplate = `{
                 }
             }
         },
+        "/parking-sessions": {
+            "get": {
+                "description": "Trả về danh sách tất cả phiên gửi xe",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "parking_session"
+                ],
+                "summary": "Lấy danh sách phiên gửi xe",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/parking-sessions/card/{uid}": {
+            "delete": {
+                "description": "Đóng phiên gửi xe đang active theo UID thẻ, dùng cho testing",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "parking_session"
+                ],
+                "summary": "Đóng phiên gửi xe theo UID thẻ (test)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UID thẻ",
+                        "name": "uid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/parking-sessions/purge/{id}": {
+            "delete": {
+                "description": "Xóa vĩnh viễn phiên gửi xe khỏi DB",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "parking_session"
+                ],
+                "summary": "Xóa vĩnh viễn phiên gửi xe",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID phiên gửi xe",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/parking-sessions/{id}": {
+            "get": {
+                "description": "Lấy thông tin phiên gửi xe theo ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "parking_session"
+                ],
+                "summary": "Lấy chi tiết phiên gửi xe",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID phiên gửi xe",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Đóng phiên gửi xe theo ID, dùng cho testing",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "parking_session"
+                ],
+                "summary": "Đóng phiên gửi xe theo ID (test)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID phiên gửi xe",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/parking-slots": {
             "post": {
                 "security": [
@@ -930,8 +1104,69 @@ const docTemplate = `{
                 }
             }
         },
-        "/parking-slots/sensor/status": {
+        "/parking-slots/admin/{id}": {
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Cập nhật trạng thái vị trí đỗ xe theo ID bởi quản trị viên hoặc quản lý",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "parking_slot"
+                ],
+                "summary": "Quản trị viên cập nhật trạng thái vị trí đỗ",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID vị trí đỗ xe",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Thông tin cập nhật trạng thái",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/parking_slot.AdminUpdateParkingSlotRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/parking-slots/sensor": {
+            "post": {
                 "description": "Cập nhật trạng thái vị trí đỗ xe từ cảm biến hoặc thiết bị IoT",
                 "consumes": [
                     "application/json"
@@ -1022,7 +1257,7 @@ const docTemplate = `{
             }
         },
         "/parking-slots/{id}/device": {
-            "put": {
+            "patch": {
                 "security": [
                     {
                         "BearerAuth": []
@@ -1082,14 +1317,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/parking-slots/{id}/status": {
-            "patch": {
+        "/rfid-cards": {
+            "post": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Cập nhật trạng thái vị trí đỗ xe theo ID bởi quản trị viên hoặc quản lý",
+                "description": "Tạo mới thẻ RFID trong hệ thống",
                 "consumes": [
                     "application/json"
                 ],
@@ -1097,24 +1332,78 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "parking_slot"
+                    "rfid_card"
                 ],
-                "summary": "Quản trị viên cập nhật trạng thái vị trí đỗ",
+                "summary": "Tạo thẻ RFID",
+                "parameters": [
+                    {
+                        "description": "Thông tin thẻ RFID",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rfid_card.CreateRfidCardRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/rfid-cards/{id}": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Cập nhật thông tin thẻ RFID theo ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rfid_card"
+                ],
+                "summary": "Cập nhật thẻ RFID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "ID vị trí đỗ xe",
+                        "description": "ID thẻ RFID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Thông tin cập nhật trạng thái",
+                        "description": "Thông tin cập nhật",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/parking_slot.AdminUpdateParkingSlotRequest"
+                            "$ref": "#/definitions/rfid_card.UpdateRfidCardRequest"
                         }
                     }
                 ],
@@ -1143,7 +1432,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/parking-slots/{slotId}/history": {
+        "/slot-histories/{slotId}": {
             "get": {
                 "security": [
                     {
@@ -1300,7 +1589,7 @@ const docTemplate = `{
             }
         },
         "/users/change-password": {
-            "post": {
+            "patch": {
                 "security": [
                     {
                         "BearerAuth": []
@@ -1353,7 +1642,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/{id}/role": {
+        "/users/change-role/{id}": {
             "patch": {
                 "security": [
                     {
@@ -1754,6 +2043,52 @@ const docTemplate = `{
                 "SlotStatusOccupied",
                 "SlotStatusMaintain"
             ]
+        },
+        "rfid_card.CardType": {
+            "type": "string",
+            "enum": [
+                "REGISTERED",
+                "GUEST"
+            ],
+            "x-enum-varnames": [
+                "CardTypeRegistered",
+                "CardTypeGuest"
+            ]
+        },
+        "rfid_card.CreateRfidCardRequest": {
+            "type": "object",
+            "required": [
+                "card_type",
+                "uid"
+            ],
+            "properties": {
+                "card_type": {
+                    "$ref": "#/definitions/rfid_card.CardType"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "owner_name": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "rfid_card.UpdateRfidCardRequest": {
+            "type": "object",
+            "properties": {
+                "card_type": {
+                    "$ref": "#/definitions/rfid_card.CardType"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "owner_name": {
+                    "type": "string"
+                }
+            }
         },
         "user.ChangePasswordRequest": {
             "type": "object",

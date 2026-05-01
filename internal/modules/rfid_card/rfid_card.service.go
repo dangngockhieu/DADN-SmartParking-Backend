@@ -127,3 +127,80 @@ func (s *Service) FindByUID(uid string) (*RfidCard, error) {
 
 	return card, nil
 }
+
+func (s *Service) GetStatistics(lotID *uint) (*RfidCardStatisticsResponse, error) {
+	total, registered, unregistered, active, err := s.repo.CountStatistics(lotID)
+	if err != nil {
+		return nil, appErrors.NewInternal("Thống kê thẻ RFID thất bại")
+	}
+
+	return &RfidCardStatisticsResponse{
+		TotalCards:        total,
+		RegisteredCards:   registered,
+		UnregisteredCards: unregistered,
+		ActiveCards:       active,
+	}, nil
+}
+
+func (s *Service) FindWithFilters(
+	lotID *uint,
+	status *CardType,
+	keyword string,
+	page int,
+	pageSize int,
+) (*RfidCardListResponse, error) {
+	if status != nil && !s.validateCardType(*status) {
+		return nil, appErrors.NewBadRequest("Status phải là REGISTERED hoặc GUEST")
+	}
+
+	rows, total, err := s.repo.FindWithFilters(lotID, status, keyword, page, pageSize)
+	if err != nil {
+		return nil, appErrors.NewInternal("Lấy danh sách thẻ RFID thất bại")
+	}
+
+	items := make([]RfidCardListItem, 0, len(rows))
+	for _, row := range rows {
+		var registeredAt *string
+		if row.CardType == CardTypeRegistered {
+			value := row.CreatedAt.Format("2006-01-02")
+			registeredAt = &value
+		}
+
+		items = append(items, RfidCardListItem{
+			ID:           row.ID,
+			CardUID:      row.UID,
+			PlateNumber:  row.PlateNumber,
+			UserName:     row.OwnerName,
+			Status:       row.CardType,
+			RegisteredAt: registeredAt,
+		})
+	}
+
+	meta := buildRfidCardListMeta(total, page, pageSize)
+
+	return &RfidCardListResponse{
+		Data: items,
+		Meta: meta,
+	}, nil
+}
+
+func buildRfidCardListMeta(totalElements int64, page int, pageSize int) RfidCardListMeta {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 10
+	}
+
+	totalPages := 0
+	if totalElements > 0 {
+		totalPages = int((totalElements + int64(pageSize) - 1) / int64(pageSize))
+	}
+
+	return RfidCardListMeta{
+		TotalElements: totalElements,
+		TotalPages:    totalPages,
+		CurrentPage:   page,
+		PageSize:      pageSize,
+	}
+}

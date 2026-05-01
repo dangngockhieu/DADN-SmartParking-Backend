@@ -10,6 +10,7 @@ import (
 	"backend/internal/auth"
 	authmail "backend/internal/auth/mail"
 	"backend/internal/auth/token"
+	"backend/internal/modules/dashboard"
 	"backend/internal/modules/gate"
 	"backend/internal/modules/iot_device"
 	"backend/internal/modules/iot_gateway"
@@ -80,6 +81,7 @@ func main() {
 	gateModule := gate.NewModule(db)
 	userModule := user.NewModule(db)
 	rfidCardModule := rfid_card.NewModule(db)
+	dashboardModule := dashboard.NewModule(db)
 
 	// Quan trọng: inject parkingHub vào parking_slot module
 	parkingSlotModule := parking_slot.NewModule(db, parkingHub)
@@ -146,6 +148,7 @@ func main() {
 	user.RegisterRoutes(api, userModule.Handler, authMiddleware, adminOnly)
 	rfid_card.RegisterRoutes(api, rfidCardModule.Handler, authMiddleware, adminOnly)
 	parking_session.RegisterRoutes(api, parkingSessionModule.Handler)
+	dashboard.RegisterRoutes(api, dashboardModule.Handler, authMiddleware, adminOnly)
 
 	log.Printf("[APP] starting Gin server on :%s", cfg.AppPort)
 

@@ -25,7 +25,7 @@ func NewHandler(service *Service) *Handler {
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 401 {object} map[string]interface{}
-// @Router /parking-slots/{slotId}/history [get]
+// @Router /slot-histories/{slotId} [get]
 func (h *Handler) GetBySlotID(c *gin.Context) {
 	var params GetSlotHistoryBySlotIDParams
 	if err := c.ShouldBindUri(&params); err != nil {

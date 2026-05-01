@@ -230,6 +230,37 @@ definitions:
     - SlotStatusAvailable
     - SlotStatusOccupied
     - SlotStatusMaintain
+  rfid_card.CardType:
+    enum:
+    - REGISTERED
+    - GUEST
+    type: string
+    x-enum-varnames:
+    - CardTypeRegistered
+    - CardTypeGuest
+  rfid_card.CreateRfidCardRequest:
+    properties:
+      card_type:
+        $ref: '#/definitions/rfid_card.CardType'
+      is_active:
+        type: boolean
+      owner_name:
+        type: string
+      uid:
+        type: string
+    required:
+    - card_type
+    - uid
+    type: object
+  rfid_card.UpdateRfidCardRequest:
+    properties:
+      card_type:
+        $ref: '#/definitions/rfid_card.CardType'
+      is_active:
+        type: boolean
+      owner_name:
+        type: string
+    type: object
   user.ChangePasswordRequest:
     properties:
       confirm_password:
@@ -387,7 +418,7 @@ paths:
       summary: Đăng ký tài khoản
       tags:
       - auth
-  /auth/resend-verification:
+  /auth/resend:
     post:
       consumes:
       - application/json
@@ -416,7 +447,7 @@ paths:
       tags:
       - auth
   /auth/reset-password:
-    post:
+    patch:
       consumes:
       - application/json
       description: Đặt lại mật khẩu bằng mã xác thực hoặc token reset
@@ -471,7 +502,7 @@ paths:
       summary: Gửi email đặt lại mật khẩu
       tags:
       - auth
-  /auth/verify-email:
+  /auth/verify:
     get:
       description: Xác thực tài khoản bằng email và mã code từ link gửi qua email
       parameters:
@@ -789,7 +820,7 @@ paths:
       summary: Lấy chi tiết bãi đỗ xe
       tags:
       - parking_lot
-    put:
+    patch:
       consumes:
       - application/json
       description: Cập nhật thông tin bãi đỗ xe theo ID
@@ -854,6 +885,124 @@ paths:
       summary: Lấy danh sách cổng theo bãi đỗ
       tags:
       - parking_lot
+  /parking-sessions:
+    get:
+      description: Trả về danh sách tất cả phiên gửi xe
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Lấy danh sách phiên gửi xe
+      tags:
+      - parking_session
+  /parking-sessions/{id}:
+    delete:
+      description: Đóng phiên gửi xe theo ID, dùng cho testing
+      parameters:
+      - description: ID phiên gửi xe
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Đóng phiên gửi xe theo ID (test)
+      tags:
+      - parking_session
+    get:
+      description: Lấy thông tin phiên gửi xe theo ID
+      parameters:
+      - description: ID phiên gửi xe
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Lấy chi tiết phiên gửi xe
+      tags:
+      - parking_session
+  /parking-sessions/card/{uid}:
+    delete:
+      description: Đóng phiên gửi xe đang active theo UID thẻ, dùng cho testing
+      parameters:
+      - description: UID thẻ
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Đóng phiên gửi xe theo UID thẻ (test)
+      tags:
+      - parking_session
+  /parking-sessions/purge/{id}:
+    delete:
+      description: Xóa vĩnh viễn phiên gửi xe khỏi DB
+      parameters:
+      - description: ID phiên gửi xe
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Xóa vĩnh viễn phiên gửi xe
+      tags:
+      - parking_session
   /parking-slots:
     post:
       consumes:
@@ -922,7 +1071,7 @@ paths:
       tags:
       - parking_slot
   /parking-slots/{id}/device:
-    put:
+    patch:
       consumes:
       - application/json
       description: Cập nhật hoặc thay đổi thiết bị IoT gắn với vị trí đỗ xe theo ID
@@ -961,7 +1110,7 @@ paths:
       summary: Đổi thiết bị cho vị trí đỗ
       tags:
       - parking_slot
-  /parking-slots/{id}/status:
+  /parking-slots/admin/{id}:
     patch:
       consumes:
       - application/json
@@ -1002,7 +1151,110 @@ paths:
       summary: Quản trị viên cập nhật trạng thái vị trí đỗ
       tags:
       - parking_slot
-  /parking-slots/{slotId}/history:
+  /parking-slots/sensor:
+    post:
+      consumes:
+      - application/json
+      description: Cập nhật trạng thái vị trí đỗ xe từ cảm biến hoặc thiết bị IoT
+      parameters:
+      - description: Dữ liệu trạng thái từ cảm biến
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/parking_slot.SensorUpdateParkingSlotRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Thiết bị cảm biến cập nhật trạng thái vị trí đỗ
+      tags:
+      - parking_slot
+  /rfid-cards:
+    post:
+      consumes:
+      - application/json
+      description: Tạo mới thẻ RFID trong hệ thống
+      parameters:
+      - description: Thông tin thẻ RFID
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/rfid_card.CreateRfidCardRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Tạo thẻ RFID
+      tags:
+      - rfid_card
+  /rfid-cards/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Cập nhật thông tin thẻ RFID theo ID
+      parameters:
+      - description: ID thẻ RFID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Thông tin cập nhật
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/rfid_card.UpdateRfidCardRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Cập nhật thẻ RFID
+      tags:
+      - rfid_card
+  /slot-histories/{slotId}:
     get:
       description: Trả về lịch sử hoạt động của một vị trí đỗ xe theo slot ID
       parameters:
@@ -1034,34 +1286,6 @@ paths:
       summary: Lấy lịch sử theo vị trí đỗ
       tags:
       - slot_history
-  /parking-slots/sensor/status:
-    patch:
-      consumes:
-      - application/json
-      description: Cập nhật trạng thái vị trí đỗ xe từ cảm biến hoặc thiết bị IoT
-      parameters:
-      - description: Dữ liệu trạng thái từ cảm biến
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/parking_slot.SensorUpdateParkingSlotRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Thiết bị cảm biến cập nhật trạng thái vị trí đỗ
-      tags:
-      - parking_slot
   /users:
     get:
       description: Lấy danh sách người dùng có phân trang và tìm kiếm
@@ -1132,7 +1356,42 @@ paths:
       summary: Admin tạo người dùng
       tags:
       - user
-  /users/{id}/role:
+  /users/change-password:
+    patch:
+      consumes:
+      - application/json
+      description: Người dùng hiện tại đổi mật khẩu của chính mình
+      parameters:
+      - description: Thông tin đổi mật khẩu
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Đổi mật khẩu
+      tags:
+      - user
+  /users/change-role/{id}:
     patch:
       consumes:
       - application/json
@@ -1170,41 +1429,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Đổi vai trò người dùng
-      tags:
-      - user
-  /users/change-password:
-    post:
-      consumes:
-      - application/json
-      description: Người dùng hiện tại đổi mật khẩu của chính mình
-      parameters:
-      - description: Thông tin đổi mật khẩu
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/user.ChangePasswordRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Đổi mật khẩu
       tags:
       - user
 securityDefinitions:

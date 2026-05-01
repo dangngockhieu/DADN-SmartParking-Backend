@@ -84,7 +84,7 @@ func (h *Handler) FindByID(c *gin.Context) {
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 401 {object} map[string]interface{}
-// @Router /parking-slots/{id}/status [patch]
+// @Router /parking-slots/admin/{id} [patch]
 func (h *Handler) AdminUpdateStatus(c *gin.Context) {
 	id64, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
@@ -116,7 +116,7 @@ func (h *Handler) AdminUpdateStatus(c *gin.Context) {
 // @Param request body SensorUpdateParkingSlotRequest true "Dữ liệu trạng thái từ cảm biến"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
-// @Router /parking-slots/sensor/status [patch]
+// @Router /parking-slots/sensor [post]
 func (h *Handler) SensorUpdateStatus(c *gin.Context) {
 	var req SensorUpdateParkingSlotRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -145,7 +145,7 @@ func (h *Handler) SensorUpdateStatus(c *gin.Context) {
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 401 {object} map[string]interface{}
-// @Router /parking-slots/{id}/device [put]
+// @Router /parking-slots/{id}/device [patch]
 func (h *Handler) ChangeDevice(c *gin.Context) {
 	id64, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {

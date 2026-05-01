@@ -60,7 +60,7 @@ func (h *Handler) Register(c *gin.Context) {
 // @Param code query string true "Mã xác thực"
 // @Success 200 {string} string "HTML verified page"
 // @Failure 400 {object} map[string]interface{}
-// @Router /auth/verify-email [get]
+// @Router /auth/verify [get]
 func (h *Handler) VerifyEmail(c *gin.Context) {
 	email := c.Query("email")
 	code := c.Query("code")
@@ -96,7 +96,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 // @Param request body EmailRequest true "Email người dùng"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
-// @Router /auth/resend-verification [post]
+// @Router /auth/resend [post]
 func (h *Handler) ResendVerification(c *gin.Context) {
 	var req EmailRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -253,7 +253,7 @@ func (h *Handler) SendResetPassword(c *gin.Context) {
 // @Param request body ResetPasswordRequest true "Thông tin đặt lại mật khẩu"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
-// @Router /auth/reset-password [post]
+// @Router /auth/reset-password [patch]
 func (h *Handler) ResetPassword(c *gin.Context) {
 	var req ResetPasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

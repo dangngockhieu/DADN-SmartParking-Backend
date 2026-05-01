@@ -81,7 +81,7 @@ func (h *Handler) CreateByAdmin(c *gin.Context) {
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 401 {object} map[string]interface{}
-// @Router /users/change-password [post]
+// @Router /users/change-password [patch]
 func (h *Handler) ChangePassword(c *gin.Context) {
 	var req ChangePasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -121,7 +121,7 @@ func (h *Handler) ChangePassword(c *gin.Context) {
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 401 {object} map[string]interface{}
-// @Router /users/{id}/role [patch]
+// @Router /users/change-role/{id} [patch]
 func (h *Handler) ChangeRole(c *gin.Context) {
 	id64, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {

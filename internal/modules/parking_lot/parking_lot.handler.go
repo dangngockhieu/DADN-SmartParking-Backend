@@ -128,7 +128,7 @@ func (h *Handler) GetGatesByLotID(c *gin.Context) {
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 401 {object} map[string]interface{}
-// @Router /parking-lots/{id} [put]
+// @Router /parking-lots/{id} [patch]
 func (h *Handler) Update(c *gin.Context) {
 	id64, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
