@@ -67,7 +67,6 @@ func main() {
 
 	authMiddleware := middleware.Auth(tokenService, redisClient)
 	adminOnly := middleware.RequireRoles(user.RoleAdmin)
-	managerOrAdmin := middleware.RequireRoles(user.RoleManager, user.RoleAdmin)
 
 	// realtime hub
 	parkingHub := parking.NewHub()
@@ -80,10 +79,10 @@ func main() {
 	gateModule := gate.NewModule(db)
 	userModule := user.NewModule(db)
 	rfidCardModule := rfid_card.NewModule(db)
+	parkingSlotModule := parking_slot.NewModule(db, parkingHub)
 	// rfidCardModule := rfid_card.NewModule(db, userModule.Service)
 	parkingSessionModule := parking_session.NewModule(db)
-	iotGatewayModule := iot_gateway.NewModule(gateModule.Service, rfidCardModule.Service, parkingSessionModule.Service)
-	parkingSlotModule := parking_slot.NewModule(db, parkingHub)
+	iotGatewayModule := iot_gateway.NewModule(gateModule.Service, rfidCardModule.Service, parkingSessionModule.Service, parkingSlotModule.Service)
 
 	// Khởi động WebTransport server
 	certPath, keyPath := getCertPaths()
@@ -126,14 +125,14 @@ func main() {
 	api := r.Group("/api/v1")
 
 	auth.RegisterRoutes(api, authModule.Handler, authMiddleware)
-	iot_device.RegisterRoutes(api, iotDeviceModule.Handler, authMiddleware, managerOrAdmin)
-	slot_history.RegisterRoutes(api, slotHistoryModule.Handler, authMiddleware, managerOrAdmin)
-	parking_lot.RegisterRoutes(api, parkingLotModule.Handler, authMiddleware, managerOrAdmin)
-	parking_slot.RegisterRoutes(api, parkingSlotModule.Handler, authMiddleware, managerOrAdmin)
+	iot_device.RegisterRoutes(api, iotDeviceModule.Handler, authMiddleware, adminOnly)
+	slot_history.RegisterRoutes(api, slotHistoryModule.Handler, authMiddleware, adminOnly)
+	parking_lot.RegisterRoutes(api, parkingLotModule.Handler, authMiddleware, adminOnly)
+	parking_slot.RegisterRoutes(api, parkingSlotModule.Handler, authMiddleware, adminOnly)
 	iot_gateway.RegisterRoutes(api, iotGatewayModule.Handler)
-	gate.RegisterRoutes(api, gateModule.Handler, authMiddleware, managerOrAdmin)
+	gate.RegisterRoutes(api, gateModule.Handler, authMiddleware, adminOnly)
 	user.RegisterRoutes(api, userModule.Handler, authMiddleware, adminOnly)
-	rfid_card.RegisterRoutes(api, rfidCardModule.Handler)
+	rfid_card.RegisterRoutes(api, rfidCardModule.Handler, authMiddleware, adminOnly)
 	parking_session.RegisterRoutes(api, parkingSessionModule.Handler)
 
 	_ = r.Run(":" + cfg.AppPort)

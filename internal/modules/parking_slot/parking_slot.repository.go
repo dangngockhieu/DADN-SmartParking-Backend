@@ -99,3 +99,14 @@ func (r *Repository) ChangeDeviceAndWriteHistory(
 
 	return &updated, nil
 }
+
+func (r *Repository) IsAvailable(lotID uint) (bool, error) {
+	var count int64
+	err := r.db.Model(&ParkingSlot{}).
+		Where("lot_id = ? AND status = ?", lotID, "AVAILABLE").
+		Count(&count).Error
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}

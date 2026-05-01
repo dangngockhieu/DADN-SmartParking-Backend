@@ -3,6 +3,7 @@ package iot_gateway
 import (
 	"backend/internal/modules/gate"
 	"backend/internal/modules/parking_session"
+	"backend/internal/modules/parking_slot"
 	"backend/internal/modules/rfid_card"
 )
 
@@ -16,9 +17,10 @@ func NewModule(
 	gateService *gate.Service,
 	rfidService *rfid_card.Service,
 	sessionService *parking_session.Service,
+	parkingSlotService *parking_slot.Service,
 ) *Module {
 	plateCache := NewPlateCache()
-	service := NewService(plateCache, gateService, rfidService, sessionService)
+	service := NewService(plateCache, gateService, rfidService, sessionService, parkingSlotService)
 	handler := NewHandler(service)
 
 	return &Module{

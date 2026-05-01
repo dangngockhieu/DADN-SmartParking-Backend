@@ -8,14 +8,16 @@ import (
 	appErrors "backend/internal/common/errors"
 	"backend/internal/modules/gate"
 	"backend/internal/modules/parking_session"
+	"backend/internal/modules/parking_slot"
 	"backend/internal/modules/rfid_card"
 )
 
 type Service struct {
-	plateCache     *PlateCache
-	gateService    *gate.Service
-	rfidService    *rfid_card.Service
-	sessionService *parking_session.Service
+	plateCache         *PlateCache
+	gateService        *gate.Service
+	rfidService        *rfid_card.Service
+	sessionService     *parking_session.Service
+	parkingSlotService *parking_slot.Service
 }
 
 func NewService(
@@ -23,12 +25,14 @@ func NewService(
 	gateService *gate.Service,
 	rfidService *rfid_card.Service,
 	sessionService *parking_session.Service,
+	parkingSlotService *parking_slot.Service,
 ) *Service {
 	return &Service{
-		plateCache:     plateCache,
-		gateService:    gateService,
-		rfidService:    rfidService,
-		sessionService: sessionService,
+		plateCache:         plateCache,
+		gateService:        gateService,
+		rfidService:        rfidService,
+		sessionService:     sessionService,
+		parkingSlotService: parkingSlotService,
 	}
 }
 
@@ -117,6 +121,11 @@ func (s *Service) handleEntry(
 	card *rfid_card.RfidCard,
 	plateNumber string,
 ) (*RfidScanResponse, error) {
+
+	isAvailable, err := s.parkingSlotService.IsAvailable(g.LotID)
+	if err != nil || !isAvailable {
+		return rejectResponse("Lot full"), nil
+	}
 	// Kiểm tra không có session đang active với thẻ này
 	existing, err := s.sessionService.FindActiveByCardUID(card.UID)
 	if err == nil && existing != nil {
@@ -158,11 +167,16 @@ func (s *Service) handleExit(
 		return rejectResponse("No session"), nil
 	}
 
+	// Kiểm tra biển số camera quét ở cổng ra khớp với biển số lúc vào
+	if session.PlateNumber != plateNumber {
+		return rejectResponse("Plate mismatch"), nil
+	}
+
 	// Mọi thứ hợp lệ → consume plate khỏi cache
 	s.plateCache.Consume(g.ID)
 
 	// Tính phí
-	fee := calculateFee(session)
+	fee := calculateFee(session, card)
 
 	// Kết thúc session
 	_, err = s.sessionService.FinishSession(parking_session.FinishParkingSessionInput{
@@ -195,11 +209,15 @@ func rejectResponse(msg string) *RfidScanResponse {
 }
 
 // calculateFee tính phí đơn giản: 5000đ/giờ, tối thiểu 5000đ
-func calculateFee(session *parking_session.ParkingSession) float64 {
+func calculateFee(session *parking_session.ParkingSession, card *rfid_card.RfidCard) float64 {
 	const ratePerHour = 5000.0
+	if card.CardType == rfid_card.CardTypeRegistered && card.IsActive == true {
+		return 0
+	}
 	hours := time.Since(session.EntryTime).Hours()
 	if hours < 1 {
 		hours = 1
 	}
 	return hours * ratePerHour
+
 }

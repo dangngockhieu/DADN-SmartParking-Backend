@@ -145,3 +145,11 @@ func (s *Service) ChangeDevice(id uint, req ChangeSlotDeviceRequest) (*ParkingSl
 
 	return updated, nil
 }
+
+func (s *Service) IsAvailable(lotID uint) (bool, error) {
+	exists, err := s.repo.IsAvailable(lotID)
+	if err != nil {
+		return false, appErrors.NewInternal("Kiểm tra vị trí đỗ thất bại")
+	}
+	return exists, nil
+}
