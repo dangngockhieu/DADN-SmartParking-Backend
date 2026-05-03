@@ -51,42 +51,48 @@ type RfidCardListRow struct {
 	PlateNumber *string
 }
 
-func (r *Repository) CountStatistics(lotID *uint) (int64, int64, int64, int64, error) {
+func (r *Repository) CountStatistics(registeredDate *time.Time) (int64, int64, int64, int64, int64, error) {
 	base := r.db.Model(&RfidCard{})
-	if lotID != nil {
-		base = base.Where(
-			"EXISTS (SELECT 1 FROM parking_sessions ps WHERE ps.card_uid = rfid_cards.uid AND ps.lot_id = ?)",
-			*lotID,
-		)
-	}
 
 	var total int64
 	if err := base.Count(&total).Error; err != nil {
-		return 0, 0, 0, 0, err
+		return 0, 0, 0, 0, 0, err
 	}
 
 	var registered int64
 	if err := base.Session(&gorm.Session{}).
 		Where("card_type = ?", CardTypeRegistered).
 		Count(&registered).Error; err != nil {
-		return 0, 0, 0, 0, err
+		return 0, 0, 0, 0, 0, err
 	}
 
 	var unregistered int64
 	if err := base.Session(&gorm.Session{}).
 		Where("card_type = ?", CardTypeGuest).
 		Count(&unregistered).Error; err != nil {
-		return 0, 0, 0, 0, err
+		return 0, 0, 0, 0, 0, err
 	}
 
 	var active int64
 	if err := base.Session(&gorm.Session{}).
 		Where("is_active = ?", true).
 		Count(&active).Error; err != nil {
-		return 0, 0, 0, 0, err
+		return 0, 0, 0, 0, 0, err
 	}
 
-	return total, registered, unregistered, active, nil
+	var registeredOnDate int64
+	if registeredDate != nil {
+		start := time.Date(registeredDate.Year(), registeredDate.Month(), registeredDate.Day(), 0, 0, 0, 0, registeredDate.Location())
+		end := start.Add(24 * time.Hour)
+		if err := base.Session(&gorm.Session{}).
+			Where("card_type = ?", CardTypeRegistered).
+			Where("created_at >= ? AND created_at < ?", start, end).
+			Count(&registeredOnDate).Error; err != nil {
+			return 0, 0, 0, 0, 0, err
+		}
+	}
+
+	return total, registered, unregistered, active, registeredOnDate, nil
 }
 
 func (r *Repository) FindWithFilters(
@@ -135,8 +141,7 @@ func (r *Repository) FindWithFilters(
 	if keyword != "" {
 		like := "%" + keyword + "%"
 		base = base.Where(
-			"rc.uid LIKE ? OR rc.owner_name LIKE ? OR ps.plate_number LIKE ?",
-			like,
+			"rc.uid LIKE ? OR ps.plate_number LIKE ?",
 			like,
 			like,
 		)

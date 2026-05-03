@@ -1,5 +1,6 @@
 package errors
 
+// Format Response Error
 type AppError struct {
 	Message    string
 	StatusCode int

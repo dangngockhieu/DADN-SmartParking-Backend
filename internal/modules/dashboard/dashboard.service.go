@@ -19,6 +19,8 @@ func NewService(repo *Repository) *Service {
 	return &Service{repo: repo}
 }
 
+// GetParkingFlow lấy thông tin lưu lượng xe vào/ra, số xe hiện tại
+// Tỉ lệ lấp đầy và giờ cao điểm cho bãi xe hoặc toàn bộ bãi nếu lotId không được cung cấp
 func (s *Service) GetParkingFlow(query ParkingFlowQuery) (*ParkingFlowResponse, error) {
 	location, err := time.LoadLocation("Asia/Ho_Chi_Minh")
 	if err != nil {

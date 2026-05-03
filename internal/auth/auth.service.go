@@ -119,6 +119,7 @@ func (s *Service) Register(req RegisterRequest) error {
 		return appErrors.NewInternal("Đặt TTL mã xác thực thất bại")
 	}
 
+	// Tạo URL xác thực và gửi email cho người dùng
 	verifyURL := s.mailService.BuildVerificationURL(u.Email, code)
 	if err := s.mailService.SendVerificationEmail(u.Email, u.FirstName, verifyURL); err != nil {
 		return appErrors.NewInternal("Gửi mail thất bại")

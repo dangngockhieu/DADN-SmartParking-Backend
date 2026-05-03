@@ -14,6 +14,7 @@ type Service struct {
 	cfg *configs.Config
 }
 
+// AccessToken chứa các thông tin về userID, email, role
 type AccessClaims struct {
 	UserID uint   `json:"user_id"`
 	Email  string `json:"email"`
@@ -21,6 +22,7 @@ type AccessClaims struct {
 	jwt.RegisteredClaims
 }
 
+// RefreshToken chỉ chứa userID và email
 type RefreshClaims struct {
 	UserID uint   `json:"user_id"`
 	Email  string `json:"email"`
@@ -31,6 +33,7 @@ func NewService(cfg *configs.Config) *Service {
 	return &Service{cfg: cfg}
 }
 
+// Tạo Access Token với thời hạn 15 phút
 func (s *Service) CreateAccessToken(userID uint, email, role string) (string, error) {
 	now := time.Now()
 
@@ -50,6 +53,7 @@ func (s *Service) CreateAccessToken(userID uint, email, role string) (string, er
 	return token.SignedString([]byte(s.cfg.JWTAccessSecret))
 }
 
+// Tạo Refresh Token với thời hạn 7 ngày
 func (s *Service) CreateRefreshToken(userID uint, email string) (string, error) {
 	now := time.Now()
 
@@ -68,6 +72,7 @@ func (s *Service) CreateRefreshToken(userID uint, email string) (string, error) 
 	return token.SignedString([]byte(s.cfg.JWTRefreshSecret))
 }
 
+// Xác thực Access Token và trả về thông tin trong token nếu hợp lệ
 func (s *Service) VerifyAccessToken(raw string) (*ClaimsPayload, error) {
 	token, err := jwt.ParseWithClaims(raw, &AccessClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(s.cfg.JWTAccessSecret), nil
@@ -90,6 +95,7 @@ func (s *Service) VerifyAccessToken(raw string) (*ClaimsPayload, error) {
 	}, nil
 }
 
+// Xác thực Refresh Token và trả về thông tin trong token nếu hợp lệ
 func (s *Service) VerifyRefreshToken(raw string) (*ClaimsPayload, error) {
 	token, err := jwt.ParseWithClaims(raw, &RefreshClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(s.cfg.JWTRefreshSecret), nil

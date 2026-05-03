@@ -28,6 +28,7 @@ type RfidCardStatisticsResponse struct {
 	RegisteredCards   int64 `json:"registeredCards"`
 	UnregisteredCards int64 `json:"unregisteredCards"`
 	ActiveCards       int64 `json:"activeCards"`
+	RegisteredOnDate  int64 `json:"registeredOnDate"`
 }
 
 type RfidCardListItem struct {

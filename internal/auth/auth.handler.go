@@ -19,6 +19,7 @@ type Handler struct {
 	mailService verifiedPageRenderer
 }
 
+// NewHandler tạo mới instance Handler với service và mailService đã được khởi tạo
 func NewHandler(service *Service, mailService verifiedPageRenderer) *Handler {
 	return &Handler{
 		service:     service,
@@ -37,6 +38,7 @@ func NewHandler(service *Service, mailService verifiedPageRenderer) *Handler {
 // @Failure 400 {object} map[string]interface{}
 // @Router /auth/register [post]
 func (h *Handler) Register(c *gin.Context) {
+	// Register Tài khoản mới
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.Error(appErrors.NewBadRequest("Dữ liệu không hợp lệ"))
@@ -62,6 +64,7 @@ func (h *Handler) Register(c *gin.Context) {
 // @Failure 400 {object} map[string]interface{}
 // @Router /auth/verify [get]
 func (h *Handler) VerifyEmail(c *gin.Context) {
+	// Xác thực tài khoản người dùng sau đăng ký
 	email := c.Query("email")
 	code := c.Query("code")
 
@@ -98,6 +101,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 // @Failure 400 {object} map[string]interface{}
 // @Router /auth/resend [post]
 func (h *Handler) ResendVerification(c *gin.Context) {
+	// Gửi lại email xác thực tài khoản
 	var req EmailRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.Error(appErrors.NewBadRequest("Dữ liệu không hợp lệ"))
@@ -123,6 +127,7 @@ func (h *Handler) ResendVerification(c *gin.Context) {
 // @Failure 400 {object} map[string]interface{}
 // @Router /auth/login [post]
 func (h *Handler) Login(c *gin.Context) {
+	// Đăng nhập và trả về access token, refresh token được lưu trong cookie
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.Error(appErrors.NewBadRequest("Dữ liệu không hợp lệ"))
@@ -131,6 +136,7 @@ func (h *Handler) Login(c *gin.Context) {
 
 	ip := c.ClientIP()
 
+	// Validate thông tin đăng nhập và lấy thông tin người dùng
 	u, err := h.service.ValidateUser(req.Email, req.Password, ip)
 	if err != nil {
 		c.Error(err)
@@ -161,6 +167,7 @@ func (h *Handler) Login(c *gin.Context) {
 // @Failure 401 {object} map[string]interface{}
 // @Router /auth/logout [post]
 func (h *Handler) Logout(c *gin.Context) {
+	// Đăng xuất tài khoản hiện tại và xóa refresh token cookie
 	userIDValue, exists := c.Get("user_id")
 	if !exists {
 		c.Error(appErrors.NewUnauthorized("Unauthorized"))
@@ -204,6 +211,7 @@ func (h *Handler) Logout(c *gin.Context) {
 // @Failure 401 {object} map[string]interface{}
 // @Router /auth/refresh-token [post]
 func (h *Handler) RefreshToken(c *gin.Context) {
+	// Cấp lại access token từ refresh token trong cookie
 	refreshToken, err := c.Cookie("refresh_token")
 	if err != nil || refreshToken == "" {
 		c.Error(appErrors.NewUnauthorized("Missing refresh token"))
@@ -230,6 +238,7 @@ func (h *Handler) RefreshToken(c *gin.Context) {
 // @Failure 400 {object} map[string]interface{}
 // @Router /auth/send-reset-password [post]
 func (h *Handler) SendResetPassword(c *gin.Context) {
+	// Gửi email chứa hướng dẫn hoặc mã để đặt lại mật khẩu
 	var req EmailRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.Error(appErrors.NewBadRequest("Dữ liệu không hợp lệ"))
@@ -255,6 +264,7 @@ func (h *Handler) SendResetPassword(c *gin.Context) {
 // @Failure 400 {object} map[string]interface{}
 // @Router /auth/reset-password [patch]
 func (h *Handler) ResetPassword(c *gin.Context) {
+	// Đặt lại mật khẩu bằng mã xác thực hoặc token reset
 	var req ResetPasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.Error(appErrors.NewBadRequest("Dữ liệu không hợp lệ"))

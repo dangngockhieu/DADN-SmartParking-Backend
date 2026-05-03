@@ -27,6 +27,7 @@ type Config struct {
 	CORSAllowedOrigins string
 }
 
+// LoadConfig biến môi trường
 func LoadConfig() *Config {
 	appEnv := os.Getenv("APP_ENV")
 	if appEnv == "" {

@@ -42,6 +42,7 @@ import (
 // Dev: dùng mặc định cert.pem, key.pem.
 // Production: đọc từ environment variables TLS_CERT, TLS_KEY.
 func getCertPaths() (certPath, keyPath string) {
+	// Thiết lập kết nối TLS cho WebTransport
 	certPath = os.Getenv("TLS_CERT")
 	keyPath = os.Getenv("TLS_KEY")
 
@@ -56,14 +57,15 @@ func getCertPaths() (certPath, keyPath string) {
 }
 
 func main() {
-	log.Println("[APP] starting Smart Parking Backend")
-
+	// Load giá trị từ file .env
 	cfg := configs.LoadConfig()
 
+	// Kết nối database và Redis
 	db := database.NewMySQL(cfg)
 	redisClient := database.NewRedis(cfg)
 	defer redisClient.Close()
 
+	// Khởi tạo services, modules, middleware
 	tokenService := token.NewService(cfg)
 	mailService := authmail.NewService(cfg)
 
@@ -127,6 +129,7 @@ func main() {
 	r.Use(middleware.CORS(cfg))
 	r.Use(middleware.ErrorHandler())
 
+	// Endpoint health check
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status":  "up",
@@ -134,10 +137,13 @@ func main() {
 		})
 	})
 
+	// Swagger UI available at /swagger/index.html
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	// Prefix chung cho API versioning
 	api := r.Group("/api/v1")
 
+	// Đăng ký routes cho từng module
 	auth.RegisterRoutes(api, authModule.Handler, authMiddleware)
 	iot_device.RegisterRoutes(api, iotDeviceModule.Handler, authMiddleware, adminOnly)
 	slot_history.RegisterRoutes(api, slotHistoryModule.Handler, authMiddleware, adminOnly)

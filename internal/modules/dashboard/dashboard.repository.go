@@ -14,11 +14,13 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{db: db}
 }
 
+// Cấu trúc để nhận kết quả đếm theo giờ
 type HourlyCountRow struct {
 	Hour  int   `gorm:"column:hour"`
 	Count int64 `gorm:"column:count"`
 }
 
+// Đếm số xe vào trong ngày
 func (r *Repository) CountTodayIn(start time.Time, end time.Time, lotID *uint) (int64, error) {
 	var total int64
 
@@ -36,6 +38,7 @@ func (r *Repository) CountTodayIn(start time.Time, end time.Time, lotID *uint) (
 	return total, nil
 }
 
+// Đếm số xe ra trong ngày
 func (r *Repository) CountTodayOut(start time.Time, end time.Time, lotID *uint) (int64, error) {
 	var total int64
 
@@ -54,6 +57,7 @@ func (r *Repository) CountTodayOut(start time.Time, end time.Time, lotID *uint) 
 	return total, nil
 }
 
+// Đếm số xe hiện tại đang đỗ
 func (r *Repository) CountCurrentVehicles(lotID *uint) (int64, error) {
 	var total int64
 
@@ -71,6 +75,7 @@ func (r *Repository) CountCurrentVehicles(lotID *uint) (int64, error) {
 	return total, nil
 }
 
+// Đếm tổng số chỗ trong bãi xe
 func (r *Repository) CountCapacity(lotID *uint) (int64, error) {
 	var total int64
 
@@ -87,6 +92,7 @@ func (r *Repository) CountCapacity(lotID *uint) (int64, error) {
 	return total, nil
 }
 
+// Đếm số chỗ trống trong bãi xe
 func (r *Repository) CountAvailableSlots(lotID *uint) (int64, error) {
 	var total int64
 
@@ -104,6 +110,7 @@ func (r *Repository) CountAvailableSlots(lotID *uint) (int64, error) {
 	return total, nil
 }
 
+// Lấy số xe vào theo giờ trong ngày
 func (r *Repository) GetHourlyIn(start time.Time, end time.Time, lotID *uint) ([]HourlyCountRow, error) {
 	var rows []HourlyCountRow
 
@@ -125,6 +132,7 @@ func (r *Repository) GetHourlyIn(start time.Time, end time.Time, lotID *uint) ([
 	return rows, nil
 }
 
+// Lấy số xe ra theo giờ trong ngày
 func (r *Repository) GetHourlyOut(start time.Time, end time.Time, lotID *uint) ([]HourlyCountRow, error) {
 	var rows []HourlyCountRow
 
@@ -147,6 +155,7 @@ func (r *Repository) GetHourlyOut(start time.Time, end time.Time, lotID *uint) (
 	return rows, nil
 }
 
+// Lấy tên bãi xe
 func (r *Repository) GetLotName(lotID uint) (string, error) {
 	var name string
 

@@ -2,6 +2,7 @@ package rfid_card
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -86,23 +87,23 @@ func (h *Handler) Update(c *gin.Context) {
 // @Tags rfid_card
 // @Produce json
 // @Security BearerAuth
-// @Param lotId query int false "ID bãi xe, bỏ trống để lấy toàn bộ"
+// @Param date query string false "Ngày đăng ký (YYYY-MM-DD)"
 // @Success 200 {object} map[string]interface{}
 // @Failure 401 {object} map[string]interface{}
 // @Router /rfid-cards/statistics [get]
 func (h *Handler) GetStatistics(c *gin.Context) {
-	var lotID *uint
-	if lotIDValue := c.Query("lotId"); lotIDValue != "" {
-		parsed, err := strconv.ParseUint(lotIDValue, 10, 64)
+
+	var registeredDate *time.Time
+	if dateValue := c.Query("date"); dateValue != "" {
+		parsed, err := time.ParseInLocation("2006-01-02", dateValue, time.Local)
 		if err != nil {
-			c.Error(appErrors.NewBadRequest("lotId không hợp lệ"))
+			c.Error(appErrors.NewBadRequest("date không hợp lệ"))
 			return
 		}
-		value := uint(parsed)
-		lotID = &value
+		registeredDate = &parsed
 	}
 
-	result, err := h.service.GetStatistics(lotID)
+	result, err := h.service.GetStatistics(registeredDate)
 	if err != nil {
 		c.Error(err)
 		return

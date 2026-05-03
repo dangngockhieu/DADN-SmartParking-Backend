@@ -23,7 +23,7 @@ func (r *Repository) FindUserByEmail(email string) (*user.User, error) {
 
 	err := r.db.
 		Where("email = ?", strings.TrimSpace(strings.ToLower(email))).
-		First(&u).Error
+		Take(&u).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil

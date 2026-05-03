@@ -128,8 +128,8 @@ func (s *Service) FindByUID(uid string) (*RfidCard, error) {
 	return card, nil
 }
 
-func (s *Service) GetStatistics(lotID *uint) (*RfidCardStatisticsResponse, error) {
-	total, registered, unregistered, active, err := s.repo.CountStatistics(lotID)
+func (s *Service) GetStatistics(registeredDate *time.Time) (*RfidCardStatisticsResponse, error) {
+	total, registered, unregistered, active, registeredOnDate, err := s.repo.CountStatistics(registeredDate)
 	if err != nil {
 		return nil, appErrors.NewInternal("Thống kê thẻ RFID thất bại")
 	}
@@ -139,6 +139,7 @@ func (s *Service) GetStatistics(lotID *uint) (*RfidCardStatisticsResponse, error
 		RegisteredCards:   registered,
 		UnregisteredCards: unregistered,
 		ActiveCards:       active,
+		RegisteredOnDate:  registeredOnDate,
 	}, nil
 }
 

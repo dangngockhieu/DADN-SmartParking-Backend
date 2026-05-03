@@ -45,6 +45,7 @@ func CORS(cfg *configs.Config) gin.HandlerFunc {
 			"Accept",
 			"Authorization",
 			"X-Requested-With",
+			"ngrok-skip-browser-warning",
 		}, ", "))
 
 		c.Writer.Header().Set("Access-Control-Expose-Headers", strings.Join([]string{

@@ -25,6 +25,7 @@ func NewHandler(service *Service) *Handler {
 // @Success 200 {object} ParkingFlowResponse
 // @Router /dashboard/parking-flow [get]
 func (h *Handler) GetParkingFlow(c *gin.Context) {
+	// Lấy dashboard cho bãi xe hoặc toàn bộ bãi nếu lotId không được cung cấp
 	var query ParkingFlowQuery
 
 	if err := c.ShouldBindQuery(&query); err != nil {

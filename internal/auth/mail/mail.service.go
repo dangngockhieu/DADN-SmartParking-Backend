@@ -21,6 +21,7 @@ type Service struct {
 	verifyURL   string
 }
 
+// NewService khởi tạo Service với cấu hình từ configs.Config
 func NewService(cfg *configs.Config) *Service {
 	templateDir := "templates"
 	if strings.TrimSpace(templateDir) == "" {
@@ -50,6 +51,7 @@ func (s *Service) BuildVerificationURL(email, code string) string {
 	return s.verifyURL + sep + "email=" + url.QueryEscape(email) + "&code=" + url.QueryEscape(code)
 }
 
+// SendVerificationEmail gửi email xác thực tài khoản với link chứa code xác thực
 func (s *Service) SendVerificationEmail(to, firstName, verifyURL string) error {
 	body, err := s.renderTemplate("verification.html", VerificationEmailData{
 		FirstName: firstName,
@@ -80,7 +82,7 @@ func (s *Service) RenderVerifiedPage(year int) (string, error) {
 	return s.renderTemplate("verified.html", VerifiedPageData{Year: year})
 }
 
-// renderTemplate đọc file template, thực thi với data và trả về kết quả HTML
+// RenderTemplate đọc file template, thực thi với data và trả về kết quả HTML
 func (s *Service) renderTemplate(firstName string, data any) (string, error) {
 	tplPath := filepath.Join(s.templateDir, firstName)
 
@@ -97,6 +99,7 @@ func (s *Service) renderTemplate(firstName string, data any) (string, error) {
 	return buf.String(), nil
 }
 
+// SendHTML xây dựng email với header và body HTML, sau đó gửi qua SMTP
 func (s *Service) sendHTML(to, subject, htmlBody string) error {
 	if strings.TrimSpace(to) == "" {
 		return fmt.Errorf("recipient email is required")
