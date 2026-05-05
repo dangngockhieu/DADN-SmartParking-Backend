@@ -10,10 +10,7 @@ type CreateGateRequest struct {
 }
 
 type UpdateGateRequest struct {
-	Name       string   `json:"name"        binding:"omitempty,max=50"`
-	Type       GateType `json:"type"        binding:"omitempty,oneof=ENTRY EXIT"`
-	MacAddress string   `json:"mac_address" binding:"omitempty,max=50"`
-	IsActive   *bool    `json:"is_active"`
+	MacAddress string `json:"mac_address" binding:"omitempty,max=50"`
 }
 
 // ─── URI params ──────────────────────────────────────────────────────────────

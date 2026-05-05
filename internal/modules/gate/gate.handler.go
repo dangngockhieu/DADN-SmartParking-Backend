@@ -43,31 +43,6 @@ func (h *Handler) Create(c *gin.Context) {
 	response.Success(c, 201, "Tạo cổng thành công", ToGateResponse(gate))
 }
 
-// GetByID godoc
-// @Summary Lấy thông tin cổng theo ID
-// @Tags gate
-// @Produce json
-// @Security BearerAuth
-// @Param gateId path int true "ID cổng"
-// @Success 200 {object} map[string]interface{}
-// @Failure 404 {object} map[string]interface{}
-// @Router /gates/{gateId} [get]
-func (h *Handler) GetByID(c *gin.Context) {
-	id, err := parseUintParam(c, "gateId")
-	if err != nil {
-		c.Error(appErrors.NewBadRequest("gateId không hợp lệ"))
-		return
-	}
-
-	gate, err := h.service.FindByID(id)
-	if err != nil {
-		c.Error(err)
-		return
-	}
-
-	response.Success(c, 200, "Lấy thông tin cổng thành công", ToGateResponse(gate))
-}
-
 // Update godoc
 // @Summary Cập nhật thông tin cổng
 // @Tags gate
@@ -80,7 +55,7 @@ func (h *Handler) GetByID(c *gin.Context) {
 // @Failure 400 {object} map[string]interface{}
 // @Router /gates/{gateId} [put]
 func (h *Handler) Update(c *gin.Context) {
-	id, err := parseUintParam(c, "gateId")
+	id, err := parseUintParam(c, "id")
 	if err != nil {
 		c.Error(appErrors.NewBadRequest("gateId không hợp lệ"))
 		return
@@ -99,30 +74,6 @@ func (h *Handler) Update(c *gin.Context) {
 	}
 
 	response.Success(c, 200, "Cập nhật cổng thành công", ToGateResponse(gate))
-}
-
-// Delete godoc
-// @Summary Xoá cổng
-// @Tags gate
-// @Produce json
-// @Security BearerAuth
-// @Param gateId path int true "ID cổng"
-// @Success 200 {object} map[string]interface{}
-// @Failure 404 {object} map[string]interface{}
-// @Router /gates/{gateId} [delete]
-func (h *Handler) Delete(c *gin.Context) {
-	id, err := parseUintParam(c, "gateId")
-	if err != nil {
-		c.Error(appErrors.NewBadRequest("gateId không hợp lệ"))
-		return
-	}
-
-	if err := h.service.Delete(id); err != nil {
-		c.Error(err)
-		return
-	}
-
-	response.Success(c, 200, "Xoá cổng thành công", nil)
 }
 
 // ─── helper ──────────────────────────────────────────────────────────────────

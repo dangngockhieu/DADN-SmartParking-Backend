@@ -7,9 +7,9 @@ func RegisterRoutes(api *gin.RouterGroup, handler *Handler, authMiddleware, admi
 	gates := api.Group("/gates")
 	gates.Use(authMiddleware, adminOnly)
 	{
+		//Tạo cổng mới
 		gates.POST("", handler.Create)
-		gates.GET("/:gateId", handler.GetByID)
-		gates.PUT("/:gateId", handler.Update)
-		gates.DELETE("/:gateId", handler.Delete)
+		// Cập nhật thông tin cổng
+		gates.PATCH("/:id", handler.Update)
 	}
 }
