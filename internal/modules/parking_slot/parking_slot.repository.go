@@ -1,8 +1,6 @@
 package parking_slot
 
 import (
-	"backend/internal/modules/slot_history"
-
 	"gorm.io/gorm"
 )
 
@@ -53,7 +51,7 @@ func (r *Repository) FindConflictSlot(deviceMac string, portNumber int, excludeI
 	return &slot, nil
 }
 
-func (r *Repository) ChangeDeviceAndWriteHistory(
+func (r *Repository) ChangeDevice(
 	slotID uint,
 	deviceMac string,
 	portNumber int,
@@ -72,17 +70,6 @@ func (r *Repository) ChangeDeviceAndWriteHistory(
 				"device_mac":  deviceMac,
 				"port_number": portNumber,
 			}).Error; err != nil {
-			return err
-		}
-
-		if err := tx.Create(&slot_history.SlotHistory{
-			SlotID:    slotID,
-			OldDevice: &slot.DeviceMac,
-			NewDevice: &deviceMac,
-			OldPort:   &slot.PortNumber,
-			NewPort:   &portNumber,
-			Action:    slot_history.SlotHistoryActionDeviceChange,
-		}).Error; err != nil {
 			return err
 		}
 

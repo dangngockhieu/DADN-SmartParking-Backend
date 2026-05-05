@@ -138,7 +138,7 @@ func (s *Service) ChangeDevice(id uint, req ChangeSlotDeviceRequest) (*ParkingSl
 		return nil, appErrors.NewInternal("Kiểm tra trùng thiết bị thất bại")
 	}
 
-	updated, err := s.repo.ChangeDeviceAndWriteHistory(id, req.DeviceMac, req.PortNumber)
+	updated, err := s.repo.ChangeDevice(id, req.DeviceMac, req.PortNumber)
 	if err != nil {
 		return nil, appErrors.NewInternal("Cập nhật thiết bị thất bại")
 	}
