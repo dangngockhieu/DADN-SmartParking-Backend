@@ -17,6 +17,7 @@ func NewService(repo *Repository) *Service {
 	return &Service{repo: repo}
 }
 
+// Tạo mới thẻ đỗ xe
 func (s *Service) Create(req CreateParkingLotRequest) (*ParkingLotResponse, error) {
 	req.Name = strings.TrimSpace(req.Name)
 	req.Location = strings.TrimSpace(req.Location)
@@ -44,6 +45,7 @@ func (s *Service) Create(req CreateParkingLotRequest) (*ParkingLotResponse, erro
 	}, nil
 }
 
+// Lấy danh sách tất cả thẻ đỗ xe
 func (s *Service) FindAll() ([]ParkingLotResponse, error) {
 	lots, err := s.repo.FindAll()
 	if err != nil {
@@ -62,6 +64,7 @@ func (s *Service) FindAll() ([]ParkingLotResponse, error) {
 	return result, nil
 }
 
+// Lấy thông tin chi tiết bãi đỗ theo ID, bao gồm danh sách slot và thống kê
 func (s *Service) FindByID(id uint) (*ParkingLotDetailResponse, error) {
 	lot, err := s.repo.FindByID(id)
 	if err != nil {
@@ -104,6 +107,7 @@ func (s *Service) FindByID(id uint) (*ParkingLotDetailResponse, error) {
 	}, nil
 }
 
+// Lấy danh sách cổng của bãi đỗ theo ID
 func (s *Service) FindGatesByLotID(lotID uint) ([]ParkingLotGateResponse, error) {
 	gates, err := s.repo.FindGatesByLotID(lotID)
 	if err != nil {
