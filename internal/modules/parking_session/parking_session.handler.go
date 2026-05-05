@@ -2,6 +2,7 @@ package parking_session
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -26,122 +27,94 @@ func NewHandler(service *Service) *Handler {
 // @Failure 400 {object} map[string]interface{}
 // @Router /parking-sessions [get]
 func (h *Handler) FindAll(c *gin.Context) {
-	sessions, err := h.service.FindAll()
+	dateStr := c.Query("date")
+	if dateStr == "" {
+		c.Error(appErrors.NewBadRequest("date không được để trống"))
+		return
+	}
+
+	search := c.Query("search")
+
+	date, err := time.ParseInLocation("2006-01-02", dateStr, time.Local)
+	if err != nil {
+		c.Error(appErrors.NewBadRequest("date không hợp lệ, định dạng đúng là YYYY-MM-DD"))
+		return
+	}
+
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil || page < 1 {
+		c.Error(appErrors.NewBadRequest("page không hợp lệ"))
+		return
+	}
+
+	pageSize, err := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
+	if err != nil || pageSize < 1 {
+		c.Error(appErrors.NewBadRequest("pageSize không hợp lệ"))
+		return
+	}
+
+	result, err := h.service.FindAll(date, page, pageSize, search)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	response.Success(c, 200, "Lấy danh sách phiên gửi xe thành công", sessions)
+	response.Success(c, 200, "Lấy danh sách phiên gửi xe theo ngày thành công", result)
 }
 
-// FindByID godoc
-// @Summary Lấy chi tiết phiên gửi xe
-// @Description Lấy thông tin phiên gửi xe theo ID
+// GetByDate godoc
+// @Summary Lấy danh sách phiên gửi xe theo ngày
+// @Description Lấy danh sách phiên gửi xe theo ngày, có phân trang
 // @Tags parking_session
 // @Produce json
-// @Param id path int true "ID phiên gửi xe"
+// @Param date query string true "Ngày theo định dạng YYYY-MM-DD"
+// @Param page query int false "Số trang, mặc định 1"
+// @Param pageSize query int false "Số lượng mỗi trang, mặc định 10"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
-// @Router /parking-sessions/{id} [get]
-func (h *Handler) FindByID(c *gin.Context) {
-	id64, err := strconv.ParseUint(c.Param("id"), 10, 64)
+// @Router /parking-sessions/by-date [get]
+func (h *Handler) GetByDate(c *gin.Context) {
+	dateStr := c.Query("date")
+	if dateStr == "" {
+		c.Error(appErrors.NewBadRequest("date không được để trống"))
+		return
+	}
+
+	userIDValue, exists := c.Get("user_id")
+	if !exists {
+		c.Error(appErrors.NewUnauthorized("Unauthorized"))
+		return
+	}
+
+	userID, ok := userIDValue.(uint)
+	if !ok {
+		c.Error(appErrors.NewUnauthorized("Unauthorized"))
+		return
+	}
+
+	date, err := time.ParseInLocation("2006-01-02", dateStr, time.Local)
 	if err != nil {
-		c.Error(appErrors.NewBadRequest("id không hợp lệ"))
+		c.Error(appErrors.NewBadRequest("date không hợp lệ, định dạng đúng là YYYY-MM-DD"))
 		return
 	}
 
-	session, err := h.service.FindByID(uint(id64))
-	if err != nil {
-		c.Error(err)
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil || page < 1 {
+		c.Error(appErrors.NewBadRequest("page không hợp lệ"))
 		return
 	}
 
-	response.Success(c, 200, "Session found", session)
-}
-
-// ForceClose closes a session by ID (for testing)
-// @Summary Đóng phiên gửi xe theo ID (test)
-// @Description Đóng phiên gửi xe theo ID, dùng cho testing
-// @Tags parking_session
-// @Produce json
-// @Param id path int true "ID phiên gửi xe"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Router /parking-sessions/{id} [delete]
-func (h *Handler) ForceClose(c *gin.Context) {
-	id64, err := strconv.ParseUint(c.Param("id"), 10, 64)
-	if err != nil {
-		c.Error(appErrors.NewBadRequest("Invalid ID"))
+	pageSize, err := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
+	if err != nil || pageSize < 1 {
+		c.Error(appErrors.NewBadRequest("pageSize không hợp lệ"))
 		return
 	}
 
-	result, err := h.service.FinishSession(FinishParkingSessionInput{
-		SessionID: uint(id64),
-		Fee:       0,
-	})
-	if err != nil {
-		c.Error(err)
-		return
-	}
-
-	response.Success(c, 200, "Session closed", h.service.toResponse(result))
-}
-
-// CloseByCard closes active session by card UID (for testing)
-// @Summary Đóng phiên gửi xe theo UID thẻ (test)
-// @Description Đóng phiên gửi xe đang active theo UID thẻ, dùng cho testing
-// @Tags parking_session
-// @Produce json
-// @Param uid path string true "UID thẻ"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Router /parking-sessions/card/{uid} [delete]
-func (h *Handler) CloseByCard(c *gin.Context) {
-	cardUID := c.Param("uid")
-	if cardUID == "" {
-		c.Error(appErrors.NewBadRequest("Card UID required"))
-		return
-	}
-
-	session, err := h.service.FindActiveByCardUID(cardUID)
+	result, err := h.service.GetByDate(date, userID, page, pageSize)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	result, err := h.service.FinishSession(FinishParkingSessionInput{
-		SessionID: session.ID,
-		Fee:       0,
-	})
-	if err != nil {
-		c.Error(err)
-		return
-	}
-
-	response.Success(c, 200, "Session closed", h.service.toResponse(result))
-}
-
-// HardDelete permanently removes a session from DB
-// @Summary Xóa vĩnh viễn phiên gửi xe
-// @Description Xóa vĩnh viễn phiên gửi xe khỏi DB
-// @Tags parking_session
-// @Produce json
-// @Param id path int true "ID phiên gửi xe"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Router /parking-sessions/purge/{id} [delete]
-func (h *Handler) HardDelete(c *gin.Context) {
-	id64, err := strconv.ParseUint(c.Param("id"), 10, 64)
-	if err != nil {
-		c.Error(appErrors.NewBadRequest("Invalid ID"))
-		return
-	}
-
-	if err := h.service.DeleteByID(uint(id64)); err != nil {
-		c.Error(err)
-		return
-	}
-
-	response.Success(c, 200, "Session deleted from DB", nil)
+	response.Success(c, 200, "Lấy danh sách phiên gửi xe theo ngày thành công", result)
 }

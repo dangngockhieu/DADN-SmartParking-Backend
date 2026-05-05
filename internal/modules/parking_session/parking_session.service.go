@@ -34,6 +34,7 @@ func (s *Service) toResponse(session *ParkingSession) *ParkingSessionResponse {
 	}
 }
 
+// Tạo phiên gửi xe mới
 func (s *Service) Create(input CreateParkingSessionInput) (*ParkingSession, error) {
 	input.CardUID = strings.TrimSpace(input.CardUID)
 	input.PlateNumber = strings.TrimSpace(input.PlateNumber)
@@ -63,6 +64,7 @@ func (s *Service) Create(input CreateParkingSessionInput) (*ParkingSession, erro
 	return session, nil
 }
 
+// Gán slot cho phiên gửi xe
 func (s *Service) AssignSlot(input AssignSlotInput) (*ParkingSession, error) {
 	session, err := s.repo.FindByID(input.SessionID)
 	if err != nil {
@@ -85,6 +87,7 @@ func (s *Service) AssignSlot(input AssignSlotInput) (*ParkingSession, error) {
 	return s.repo.FindByID(session.ID)
 }
 
+// Kết thúc phiên gửi xe
 func (s *Service) FinishSession(input FinishParkingSessionInput) (*ParkingSession, error) {
 	session, err := s.repo.FindByID(input.SessionID)
 	if err != nil {
@@ -111,32 +114,32 @@ func (s *Service) FinishSession(input FinishParkingSessionInput) (*ParkingSessio
 	return s.repo.FindByID(session.ID)
 }
 
-func (s *Service) FindByID(id uint) (*ParkingSessionResponse, error) {
-	session, err := s.repo.FindByID(id)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, appErrors.NewNotFound("Không tìm thấy phiên gửi xe")
-		}
-		return nil, appErrors.NewInternal("Lấy thông tin phiên gửi xe thất bại")
-	}
-
-	return s.toResponse(session), nil
-}
-
-func (s *Service) FindAll() ([]ParkingSessionResponse, error) {
-	sessions, err := s.repo.FindAll()
+// Lấy danh sách phiên gửi xe theo ngày
+func (s *Service) FindAll(
+	date time.Time,
+	page int,
+	pageSize int,
+	search string,
+) (*ManageParkingSessionListResponse, error) {
+	sessions, total, err := s.repo.FindAll(date, page, pageSize, search)
 	if err != nil {
 		return nil, appErrors.NewInternal("Lấy danh sách phiên gửi xe thất bại")
 	}
 
-	result := make([]ParkingSessionResponse, 0, len(sessions))
+	items := make([]ManageParkingSessionResponse, 0, len(sessions))
 	for _, session := range sessions {
-		result = append(result, *s.toResponse(&session))
+		items = append(items, session)
 	}
 
-	return result, nil
+	meta := buildParkingSessionListMeta(total, page, pageSize)
+
+	return &ManageParkingSessionListResponse{
+		Data: items,
+		Meta: meta,
+	}, nil
 }
 
+// Lấy phiên gửi xe đang hoạt động theo CardUID
 func (s *Service) FindActiveByCardUID(cardUID string) (*ParkingSession, error) {
 	session, err := s.repo.FindActiveByCardUID(strings.TrimSpace(cardUID))
 	if err != nil {
@@ -148,6 +151,7 @@ func (s *Service) FindActiveByCardUID(cardUID string) (*ParkingSession, error) {
 	return session, nil
 }
 
+// Lấy phiên gửi xe đang hoạt động theo PlateNumber
 func (s *Service) FindActiveByPlateNumber(plateNumber string) (*ParkingSession, error) {
 	session, err := s.repo.FindActiveByPlateNumber(strings.TrimSpace(plateNumber))
 	if err != nil {
@@ -159,13 +163,55 @@ func (s *Service) FindActiveByPlateNumber(plateNumber string) (*ParkingSession, 
 	return session, nil
 }
 
-func (s *Service) DeleteByID(id uint) error {
-	_, err := s.repo.FindByID(id)
+// Lấy danh sách phiên gửi xe theo ngày và userID
+func (s *Service) GetByDate(
+	date time.Time,
+	userID uint,
+	page int,
+	pageSize int,
+) (*ParkingSessionListResponse, error) {
+	sessions, total, err := s.repo.FindByDate(date, userID, page, pageSize)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return appErrors.NewNotFound("Session not found")
-		}
-		return appErrors.NewInternal("Failed to find session")
+		return nil, appErrors.NewInternal("Lấy danh sách phiên gửi xe thất bại")
 	}
-	return s.repo.DeleteByID(id)
+
+	items := make([]ParkingSessionResponse, 0, len(sessions))
+
+	for _, session := range sessions {
+		items = append(items, *s.toResponse(&session))
+	}
+
+	meta := buildParkingSessionListMeta(total, page, pageSize)
+
+	return &ParkingSessionListResponse{
+		Data: items,
+		Meta: meta,
+	}, nil
+}
+
+func buildParkingSessionListMeta(
+	totalElements int64,
+	page int,
+	pageSize int,
+) ParkingSessionListMeta {
+	if page < 1 {
+		page = 1
+	}
+
+	if pageSize < 1 {
+		pageSize = 10
+	}
+
+	totalPages := 0
+
+	if totalElements > 0 {
+		totalPages = int((totalElements + int64(pageSize) - 1) / int64(pageSize))
+	}
+
+	return ParkingSessionListMeta{
+		TotalElements: totalElements,
+		TotalPages:    totalPages,
+		CurrentPage:   page,
+		PageSize:      pageSize,
+	}
 }
