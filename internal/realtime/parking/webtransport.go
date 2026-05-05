@@ -60,6 +60,15 @@ func NewServer(hub *Hub, certFile, keyFile string) *Server {
 					NextProtos:   []string{"h3"},
 				},
 			},
+			CheckOrigin: func(r *http.Request) bool {
+				origin := r.Header.Get("Origin")
+				log.Println("[WT] Origin:", origin)
+
+				return origin == "http://localhost:3000" ||
+					origin == "https://localhost:3000" ||
+					origin == "http://127.0.0.1:3000" ||
+					origin == "https://127.0.0.1:3000"
+			},
 		},
 	}
 }
