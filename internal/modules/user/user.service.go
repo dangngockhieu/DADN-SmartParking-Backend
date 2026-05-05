@@ -16,15 +16,16 @@ func NewService(repo *Repository) *Service {
 	return &Service{repo: repo}
 }
 
-func (s *Service) FindWithPagination(page, limit int, search string) (*UserPaginationResponse, error) {
+// FindWithPagination lấy danh sách người dùng với phân trang và tìm kiếm
+func (s *Service) FindWithPagination(page, pageSize int, search string) (*UserPaginationResponse, error) {
 	if page <= 0 {
 		page = 1
 	}
-	if limit <= 0 {
-		limit = 10
+	if pageSize <= 0 {
+		pageSize = 10
 	}
 
-	users, total, err := s.repo.FindWithPagination(page, limit, search)
+	users, total, err := s.repo.FindWithPagination(page, pageSize, search)
 	if err != nil {
 		return nil, appErrors.NewInternal("Lấy danh sách người dùng thất bại")
 	}
@@ -46,6 +47,25 @@ func (s *Service) FindWithPagination(page, limit int, search string) (*UserPagin
 	}, nil
 }
 
+// GetUserByID lấy thông tin người dùng theo ID
+func (s *Service) GetUserByID(id uint) (*UserResponse, error) {
+	user, err := s.repo.FindByID(id)
+	if err != nil {
+		return nil, appErrors.NewInternal("Lấy thông tin người dùng thất bại")
+	}
+	if user == nil {
+		return nil, appErrors.NewNotFound("Người dùng không tồn tại!")
+	}
+	return &UserResponse{
+		ID:        user.ID,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Email:     user.Email,
+		Role:      user.Role,
+	}, nil
+}
+
+// CreateUserByAdmin tạo người dùng mới bởi admin
 func (s *Service) CreateUserByAdmin(req CreateUserRequest) error {
 	req.Email = strings.TrimSpace(strings.ToLower(req.Email))
 	req.FirstName = strings.TrimSpace(req.FirstName)
@@ -80,6 +100,7 @@ func (s *Service) CreateUserByAdmin(req CreateUserRequest) error {
 	return nil
 }
 
+// ChangePassword đổi mật khẩu cho người dùng
 func (s *Service) ChangePassword(userID uint, req ChangePasswordRequest) error {
 	if req.NewPassword != req.ConfirmPassword {
 		return appErrors.NewBadRequest("Mật khẩu mới và xác nhận mật khẩu không khớp!")
@@ -109,6 +130,7 @@ func (s *Service) ChangePassword(userID uint, req ChangePasswordRequest) error {
 	return nil
 }
 
+// ChangeRole đổi vai trò cho người dùng
 func (s *Service) ChangeRole(userID uint, req ChangeRoleRequest) error {
 	user, err := s.repo.FindByID(userID)
 	if err != nil {
@@ -123,4 +145,23 @@ func (s *Service) ChangeRole(userID uint, req ChangeRoleRequest) error {
 	}
 
 	return nil
+}
+
+// ChangeProfile cập nhật thông tin cá nhân cho người dùng
+func (s *Service) ChangeProfile(userID uint, req ChangeProfileRequest) (*UserResponse, error) {
+	// Hứng cả updatedUser và err
+	updatedUser, err := s.repo.UpdateProfile(userID, req.FirstName, req.LastName)
+
+	if err != nil {
+		return nil, appErrors.NewInternal("Cập nhật thông tin người dùng thất bại")
+	}
+
+	// Trả data mới nhất về
+	return &UserResponse{
+		ID:        updatedUser.ID,
+		FirstName: updatedUser.FirstName,
+		LastName:  updatedUser.LastName,
+		Email:     updatedUser.Email,
+		Role:      updatedUser.Role,
+	}, nil
 }

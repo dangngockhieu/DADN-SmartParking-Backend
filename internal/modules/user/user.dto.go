@@ -14,6 +14,11 @@ type ChangePasswordRequest struct {
 	ConfirmPassword string `json:"confirm_password" binding:"required"`
 }
 
+type ChangeProfileRequest struct {
+	FirstName *string `json:"first_name" binding:"required"`
+	LastName  *string `json:"last_name" binding:"required"`
+}
+
 type ChangeRoleRequest struct {
 	NewRole Role `json:"new_role" binding:"required"`
 }

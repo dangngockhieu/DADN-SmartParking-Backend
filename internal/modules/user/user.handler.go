@@ -30,17 +30,49 @@ func NewHandler(service *Service) *Handler {
 // @Failure 401 {object} map[string]interface{}
 // @Router /users [get]
 func (h *Handler) FindWithPagination(c *gin.Context) {
+	// Lấy người dùng và phân trang
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
 	search := c.Query("search")
 
-	result, err := h.service.FindWithPagination(page, limit, search)
+	result, err := h.service.FindWithPagination(page, pageSize, search)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
 	response.Success(c, 200, "Lấy danh sách người dùng thành công", result)
+}
+
+// GetMyInfo godoc
+// @Summary Lấy thông tin người dùng hiện tại
+// @Description Lấy thông tin của người dùng đang đăng nhập
+// @Tags user
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Router /users/my-info [get]
+func (h *Handler) GetMyInfo(c *gin.Context) {
+	// Lấy thông tin người dùng hiện tại
+	userIDValue, exists := c.Get("user_id")
+	if !exists {
+		c.Error(appErrors.NewUnauthorized("Unauthorized"))
+		return
+	}
+	userID, ok := userIDValue.(uint)
+	if !ok {
+		c.Error(appErrors.NewUnauthorized("Unauthorized"))
+		return
+	}
+
+	user, err := h.service.GetUserByID(userID)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	response.Success(c, 200, "Lấy thông tin người dùng thành công", user)
 }
 
 // CreateByAdmin godoc
@@ -56,6 +88,7 @@ func (h *Handler) FindWithPagination(c *gin.Context) {
 // @Failure 401 {object} map[string]interface{}
 // @Router /users [post]
 func (h *Handler) CreateByAdmin(c *gin.Context) {
+	// Tạo người dùng mới bởi admin
 	var req CreateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.Error(appErrors.NewBadRequest("Dữ liệu không hợp lệ"))
@@ -83,6 +116,7 @@ func (h *Handler) CreateByAdmin(c *gin.Context) {
 // @Failure 401 {object} map[string]interface{}
 // @Router /users/change-password [patch]
 func (h *Handler) ChangePassword(c *gin.Context) {
+	// Đổi mật khẩu
 	var req ChangePasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.Error(appErrors.NewBadRequest("Dữ liệu không hợp lệ"))
@@ -123,6 +157,7 @@ func (h *Handler) ChangePassword(c *gin.Context) {
 // @Failure 401 {object} map[string]interface{}
 // @Router /users/change-role/{id} [patch]
 func (h *Handler) ChangeRole(c *gin.Context) {
+	// Đổi vai trò người dùng
 	id64, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		c.Error(appErrors.NewBadRequest("id không hợp lệ"))
@@ -141,4 +176,37 @@ func (h *Handler) ChangeRole(c *gin.Context) {
 	}
 
 	response.Success(c, 200, "Đổi vai trò thành công", nil)
+}
+
+// UpdateProfile godoc
+// @Summary Cập nhật thông tin cá nhân
+// @Description Người dùng hiện tại cập nhật thông tin cá nhân của chính mình
+// @Tags user
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body ChangeProfileRequest true "Thông tin cập nhật"
+// @Success 200 {object} map[string]interface{}
+func (h *Handler) UpdateProfile(c *gin.Context) {
+	var req ChangeProfileRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.Error(appErrors.NewBadRequest("Dữ liệu không hợp lệ"))
+		return
+	}
+	userIDValue, exists := c.Get("user_id")
+	if !exists {
+		c.Error(appErrors.NewUnauthorized("Unauthorized"))
+		return
+	}
+	userID, ok := userIDValue.(uint)
+	if !ok {
+		c.Error(appErrors.NewUnauthorized("Unauthorized"))
+		return
+	}
+	updatedUser, err := h.service.ChangeProfile(userID, req)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	response.Success(c, 200, "Cập nhật thông tin thành công", updatedUser)
 }

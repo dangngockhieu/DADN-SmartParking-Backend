@@ -14,6 +14,7 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{db: db}
 }
 
+// FindByEmail tìm người dùng theo email
 func (r *Repository) FindByEmail(email string) (*User, error) {
 	var user User
 	err := r.db.Where("email = ?", strings.TrimSpace(strings.ToLower(email))).Take(&user).Error
@@ -26,6 +27,7 @@ func (r *Repository) FindByEmail(email string) (*User, error) {
 	return &user, nil
 }
 
+// FindByID tìm người dùng theo ID
 func (r *Repository) FindByID(id uint) (*User, error) {
 	var user User
 	err := r.db.First(&user, id).Error
@@ -38,32 +40,34 @@ func (r *Repository) FindByID(id uint) (*User, error) {
 	return &user, nil
 }
 
+// Create thêm mới người dùng vào database
 func (r *Repository) Create(user *User) error {
 	return r.db.Create(user).Error
 }
 
+// UpdatePassword cập nhật mật khẩu đã được hash cho người dùng
 func (r *Repository) UpdatePassword(id uint, hashedPassword string) error {
 	return r.db.Model(&User{}).Where("id = ?", id).Update("password", hashedPassword).Error
 }
 
+// UpdateRole cập nhật vai trò cho người dùng
 func (r *Repository) UpdateRole(id uint, role Role) error {
 	return r.db.Model(&User{}).Where("id = ?", id).Update("role", role).Error
 }
 
-func (r *Repository) FindWithPagination(page, limit int, search string) ([]User, int64, error) {
+// FindWithPagination tìm người dùng với phân trang và tìm kiếm
+func (r *Repository) FindWithPagination(page, pageSize int, search string) ([]User, int64, error) {
 	var users []User
 	var total int64
 
-	offset := (page - 1) * limit
+	offset := (page - 1) * pageSize
 	query := r.db.Model(&User{}).Where("is_verified = ?", true)
 
 	search = strings.TrimSpace(search)
 	if search != "" {
-		like := "%" + search + "%"
+		like := search + "%"
 		query = query.Where(
-			r.db.Where("first_name LIKE ?", like).
-				Or("last_name LIKE ?", like).
-				Or("email LIKE ?", like),
+			r.db.Where("email LIKE ?", like),
 		)
 	}
 
@@ -75,11 +79,30 @@ func (r *Repository) FindWithPagination(page, limit int, search string) ([]User,
 		Select("id", "first_name", "last_name", "email", "role").
 		Order("id ASC").
 		Offset(offset).
-		Limit(limit).
+		Limit(pageSize).
 		Find(&users).Error
 	if err != nil {
 		return nil, 0, err
 	}
 
 	return users, total, nil
+}
+
+// UpdateProfile cập nhật thông tin cá nhân cho người dùng
+func (r *Repository) UpdateProfile(id uint, first_name, last_name *string) (*User, error) {
+	updateData := make(map[string]interface{})
+
+	if first_name != nil {
+		updateData["first_name"] = *first_name
+	}
+	if last_name != nil {
+		updateData["last_name"] = *last_name
+	}
+
+	err := r.db.Model(&User{}).Where("id = ?", id).Updates(updateData).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return r.FindByID(id)
 }
