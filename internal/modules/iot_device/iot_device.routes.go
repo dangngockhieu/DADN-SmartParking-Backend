@@ -9,5 +9,7 @@ func RegisterRoutes(api *gin.RouterGroup, handler *Handler, authMiddleware, admi
 	iotDevices.Use(authMiddleware)
 	{
 		iotDevices.POST("", adminOnly, handler.CreateDevice)
+		iotDevices.GET("", adminOnly, handler.FindAllDevices)
+		iotDevices.PATCH("/:mac_address", adminOnly, handler.UpdateDevice)
 	}
 }
