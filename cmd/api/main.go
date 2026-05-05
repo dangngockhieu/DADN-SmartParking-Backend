@@ -18,7 +18,6 @@ import (
 	"backend/internal/modules/parking_session"
 	"backend/internal/modules/parking_slot"
 	"backend/internal/modules/rfid_card"
-	"backend/internal/modules/slot_history"
 	"backend/internal/modules/user"
 	"backend/internal/realtime/parking"
 	"backend/pkg/database"
@@ -78,7 +77,6 @@ func main() {
 	// Modules
 	authModule := auth.NewModule(db, redisClient, tokenService, mailService)
 	iotDeviceModule := iot_device.NewModule(db)
-	slotHistoryModule := slot_history.NewModule(db)
 	parkingLotModule := parking_lot.NewModule(db)
 	gateModule := gate.NewModule(db)
 	userModule := user.NewModule(db)
@@ -146,14 +144,13 @@ func main() {
 	// Đăng ký routes cho từng module
 	auth.RegisterRoutes(api, authModule.Handler, authMiddleware)
 	iot_device.RegisterRoutes(api, iotDeviceModule.Handler, authMiddleware, adminOnly)
-	slot_history.RegisterRoutes(api, slotHistoryModule.Handler, authMiddleware, adminOnly)
 	parking_lot.RegisterRoutes(api, parkingLotModule.Handler, authMiddleware, adminOnly)
 	parking_slot.RegisterRoutes(api, parkingSlotModule.Handler, authMiddleware, adminOnly)
 	iot_gateway.RegisterRoutes(api, iotGatewayModule.Handler)
 	gate.RegisterRoutes(api, gateModule.Handler, authMiddleware, adminOnly)
 	user.RegisterRoutes(api, userModule.Handler, authMiddleware, adminOnly)
 	rfid_card.RegisterRoutes(api, rfidCardModule.Handler, authMiddleware, adminOnly)
-	parking_session.RegisterRoutes(api, parkingSessionModule.Handler)
+	parking_session.RegisterRoutes(api, parkingSessionModule.Handler, authMiddleware, adminOnly)
 	dashboard.RegisterRoutes(api, dashboardModule.Handler, authMiddleware, adminOnly)
 
 	log.Printf("[APP] starting Gin server on :%s", cfg.AppPort)
