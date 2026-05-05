@@ -1,26 +1,35 @@
 package rfid_card
 
 type CreateRfidCardRequest struct {
-	UID       string   `json:"uid" binding:"required"`
-	CardType  CardType `json:"card_type" binding:"required"`
-	OwnerName *string  `json:"owner_name"`
-	IsActive  *bool    `json:"is_active"`
+	UID      string   `json:"uid" binding:"required"`
+	CardType CardType `json:"card_type" binding:"required"`
+	UserID   *uint    `json:"user_id"`
 }
 
 type UpdateRfidCardRequest struct {
-	CardType  *CardType `json:"card_type"`
-	OwnerName *string   `json:"owner_name"`
-	IsActive  *bool     `json:"is_active"`
+	CardType *CardType `json:"card_type"`
+	UserID   *uint     `json:"user_id"`
+	IsActive *bool     `json:"is_active"`
 }
 
 type RfidCardResponse struct {
 	ID        uint     `json:"id"`
 	UID       string   `json:"uid"`
 	CardType  CardType `json:"card_type"`
-	OwnerName *string  `json:"owner_name,omitempty"`
+	UserID    *uint    `json:"user_id,omitempty"`
 	IsActive  bool     `json:"is_active"`
 	CreatedAt string   `json:"created_at"`
 	UpdatedAt string   `json:"updated_at"`
+}
+
+type MyRfidCardResponse struct {
+	ID           uint     `json:"id"`
+	CardUID      string   `json:"cardUid"`
+	UserID       *uint    `json:"userId"`
+	OwnerName    *string  `json:"ownerName"`
+	Status       CardType `json:"status"`
+	IsActive     bool     `json:"isActive"`
+	RegisteredAt *string  `json:"registeredAt"`
 }
 
 type RfidCardStatisticsResponse struct {
@@ -28,15 +37,15 @@ type RfidCardStatisticsResponse struct {
 	RegisteredCards   int64 `json:"registeredCards"`
 	UnregisteredCards int64 `json:"unregisteredCards"`
 	ActiveCards       int64 `json:"activeCards"`
-	RegisteredOnDate  int64 `json:"registeredOnDate"`
 }
 
 type RfidCardListItem struct {
 	ID           uint     `json:"id"`
 	CardUID      string   `json:"cardUid"`
-	PlateNumber  *string  `json:"plateNumber"`
-	UserName     *string  `json:"userName"`
+	UserID       *uint    `json:"userId"`
+	OwnerName    *string  `json:"ownerName"`
 	Status       CardType `json:"status"`
+	IsActive     bool     `json:"isActive"`
 	RegisteredAt *string  `json:"registeredAt"`
 }
 

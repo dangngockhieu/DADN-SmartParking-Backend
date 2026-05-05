@@ -15,10 +15,12 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{db: db}
 }
 
+// Create thêm một thẻ RFID mới vào cơ sở dữ liệu
 func (r *Repository) Create(card *RfidCard) error {
 	return r.db.Create(card).Error
 }
 
+// FindByID tìm kiếm thẻ RFID theo ID
 func (r *Repository) FindByID(id uint) (*RfidCard, error) {
 	var card RfidCard
 	err := r.db.First(&card, id).Error
@@ -28,6 +30,45 @@ func (r *Repository) FindByID(id uint) (*RfidCard, error) {
 	return &card, nil
 }
 
+type RfidCardDetailRow struct {
+	ID        uint
+	UID       string
+	CardType  CardType
+	UserID    *uint
+	OwnerName *string
+	IsActive  bool
+	CreatedAt time.Time
+}
+
+// Lấy thẻ theo userId
+func (r *Repository) GetByUserID(userID uint) (*RfidCardDetailRow, error) {
+	var row RfidCardDetailRow
+
+	err := r.db.Table("rfid_cards AS rc").
+		Joins("LEFT JOIN users AS u ON u.id = rc.user_id").
+		Where("rc.user_id = ?", userID).
+		Select(`
+			rc.id,
+			rc.uid,
+			rc.card_type,
+			rc.user_id,
+			NULLIF(
+				TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))),
+				''
+			) AS owner_name,
+			rc.is_active,
+			rc.created_at
+		`).
+		First(&row).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &row, nil
+}
+
+// Update thẻ RFID theo ID với dữ liệu mới
 func (r *Repository) UpdateByID(id uint, data map[string]any) error {
 	return r.db.Model(&RfidCard{}).Where("id = ?", id).Session(&gorm.Session{}).UpdateColumns(data).Error
 }
@@ -45,59 +86,46 @@ type RfidCardListRow struct {
 	ID          uint
 	UID         string
 	CardType    CardType
+	UserID      *uint
 	OwnerName   *string
 	IsActive    bool
 	CreatedAt   time.Time
 	PlateNumber *string
 }
 
-func (r *Repository) CountStatistics(registeredDate *time.Time) (int64, int64, int64, int64, int64, error) {
-	base := r.db.Model(&RfidCard{})
-
+func (r *Repository) CountStatistics() (int64, int64, int64, int64, error) {
 	var total int64
-	if err := base.Count(&total).Error; err != nil {
-		return 0, 0, 0, 0, 0, err
+	if err := r.db.Model(&RfidCard{}).
+		Count(&total).Error; err != nil {
+		return 0, 0, 0, 0, err
 	}
 
 	var registered int64
-	if err := base.Session(&gorm.Session{}).
+	if err := r.db.Model(&RfidCard{}).
 		Where("card_type = ?", CardTypeRegistered).
 		Count(&registered).Error; err != nil {
-		return 0, 0, 0, 0, 0, err
+		return 0, 0, 0, 0, err
 	}
 
 	var unregistered int64
-	if err := base.Session(&gorm.Session{}).
+	if err := r.db.Model(&RfidCard{}).
 		Where("card_type = ?", CardTypeGuest).
 		Count(&unregistered).Error; err != nil {
-		return 0, 0, 0, 0, 0, err
+		return 0, 0, 0, 0, err
 	}
 
 	var active int64
-	if err := base.Session(&gorm.Session{}).
+	if err := r.db.Model(&RfidCard{}).
 		Where("is_active = ?", true).
 		Count(&active).Error; err != nil {
-		return 0, 0, 0, 0, 0, err
+		return 0, 0, 0, 0, err
 	}
 
-	var registeredOnDate int64
-	if registeredDate != nil {
-		start := time.Date(registeredDate.Year(), registeredDate.Month(), registeredDate.Day(), 0, 0, 0, 0, registeredDate.Location())
-		end := start.Add(24 * time.Hour)
-		if err := base.Session(&gorm.Session{}).
-			Where("card_type = ?", CardTypeRegistered).
-			Where("created_at >= ? AND created_at < ?", start, end).
-			Count(&registeredOnDate).Error; err != nil {
-			return 0, 0, 0, 0, 0, err
-		}
-	}
-
-	return total, registered, unregistered, active, registeredOnDate, nil
+	return total, registered, unregistered, active, nil
 }
 
 func (r *Repository) FindWithFilters(
-	lotID *uint,
-	status *CardType,
+	status string,
 	keyword string,
 	page int,
 	pageSize int,
@@ -105,6 +133,7 @@ func (r *Repository) FindWithFilters(
 	if page < 1 {
 		page = 1
 	}
+
 	if pageSize < 1 {
 		pageSize = 10
 	}
@@ -113,36 +142,31 @@ func (r *Repository) FindWithFilters(
 
 	latestBase := r.db.Table("parking_sessions AS ps1").
 		Select("ps1.card_uid, ps1.plate_number, ps1.entry_time")
+
 	maxEntry := r.db.Table("parking_sessions").
 		Select("card_uid, MAX(entry_time) AS max_entry")
-	if lotID != nil {
-		latestBase = latestBase.Where("ps1.lot_id = ?", *lotID)
-		maxEntry = maxEntry.Where("lot_id = ?", *lotID)
-	}
+
 	maxEntry = maxEntry.Group("card_uid")
+
 	latest := latestBase.
-		Joins("JOIN (?) AS ps2 ON ps1.card_uid = ps2.card_uid AND ps1.entry_time = ps2.max_entry", maxEntry)
+		Joins(
+			"JOIN (?) AS ps2 ON ps1.card_uid = ps2.card_uid AND ps1.entry_time = ps2.max_entry",
+			maxEntry,
+		)
 
 	base := r.db.Table("rfid_cards AS rc").
+		Joins("LEFT JOIN users AS u ON u.id = rc.user_id").
 		Joins("LEFT JOIN (?) AS ps ON ps.card_uid = rc.uid", latest)
 
-	if lotID != nil {
-		base = base.Where(
-			"EXISTS (SELECT 1 FROM parking_sessions ps3 WHERE ps3.card_uid = rc.uid AND ps3.lot_id = ?)",
-			*lotID,
-		)
-	}
-
-	if status != nil {
-		base = base.Where("rc.card_type = ?", *status)
+	if status != "" {
+		base = base.Where("rc.card_type = ?", status)
 	}
 
 	keyword = strings.TrimSpace(keyword)
 	if keyword != "" {
-		like := "%" + keyword + "%"
+		like := keyword + "%"
 		base = base.Where(
-			"rc.uid LIKE ? OR ps.plate_number LIKE ?",
-			like,
+			`rc.uid LIKE ?`,
 			like,
 		)
 	}
@@ -155,15 +179,41 @@ func (r *Repository) FindWithFilters(
 	}
 
 	rows := make([]RfidCardListRow, 0)
+
 	err := base.
-		Select("rc.id, rc.uid, rc.card_type, rc.owner_name, rc.is_active, rc.created_at, ps.plate_number").
-		Order("rc.id ASC").
+		Select(`
+			rc.id,
+			rc.uid,
+			rc.card_type,
+			rc.user_id,
+			NULLIF(
+				TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))),
+				''
+			) AS owner_name,
+			rc.is_active,
+			rc.created_at,
+			ps.plate_number
+		`).
+		Order("rc.id DESC").
 		Offset(offset).
 		Limit(pageSize).
 		Scan(&rows).Error
+
 	if err != nil {
 		return nil, 0, err
 	}
 
 	return rows, total, nil
+}
+
+func (r *Repository) GetUserIDByEmail(email string) (*uint, error) {
+	var userID uint
+	if err := r.db.Table("users").
+		Select("id").
+		Where("email = ?", email).
+		Scan(&userID).Error; err != nil {
+		return nil, err
+	}
+
+	return &userID, nil
 }

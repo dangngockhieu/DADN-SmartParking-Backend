@@ -2,6 +2,7 @@ package rfid_card
 
 import (
 	"errors"
+	"log"
 	"strings"
 	"time"
 
@@ -27,7 +28,7 @@ func (s *Service) toResponse(card *RfidCard) *RfidCardResponse {
 		ID:        card.ID,
 		UID:       card.UID,
 		CardType:  card.CardType,
-		OwnerName: card.OwnerName,
+		UserID:    card.UserID,
 		IsActive:  card.IsActive,
 		CreatedAt: card.CreatedAt.Format(time.RFC3339),
 		UpdatedAt: card.UpdatedAt.Format(time.RFC3339),
@@ -40,27 +41,22 @@ func (s *Service) Create(req CreateRfidCardRequest) (*RfidCardResponse, error) {
 	if req.UID == "" {
 		return nil, appErrors.NewBadRequest("UID không được để trống")
 	}
+
 	if !s.validateCardType(req.CardType) {
 		return nil, appErrors.NewBadRequest("CardType phải là REGISTERED hoặc GUEST")
 	}
 
-	var ownerName *string
-	if req.OwnerName != nil {
-		name := strings.TrimSpace(*req.OwnerName)
-		ownerName = &name
-	}
-
-	isActive := true
-	if req.IsActive != nil {
-		isActive = *req.IsActive
+	if req.CardType == CardTypeGuest && req.UserID != nil {
+		return nil, appErrors.NewBadRequest("Thẻ GUEST không được gán user")
 	}
 
 	card := &RfidCard{
-		UID:       req.UID,
-		CardType:  req.CardType,
-		OwnerName: ownerName,
-		IsActive:  isActive,
+		UID:      req.UID,
+		CardType: req.CardType,
+		UserID:   req.UserID,
 	}
+
+	log.Println("FE gửi lên:", card)
 
 	if err := s.repo.Create(card); err != nil {
 		return nil, appErrors.NewInternal("Tạo thẻ RFID thất bại")
@@ -70,25 +66,36 @@ func (s *Service) Create(req CreateRfidCardRequest) (*RfidCardResponse, error) {
 }
 
 func (s *Service) Update(id uint, req UpdateRfidCardRequest) (*RfidCardResponse, error) {
-	if _, err := s.repo.FindByID(id); err != nil {
+	currentCard, err := s.repo.FindByID(id)
+	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, appErrors.NewNotFound("Không tìm thấy thẻ RFID")
 		}
+
 		return nil, appErrors.NewInternal("Lấy thông tin thẻ RFID thất bại")
 	}
 
 	data := map[string]any{}
 
+	nextCardType := currentCard.CardType
+
 	if req.CardType != nil {
 		if !s.validateCardType(*req.CardType) {
 			return nil, appErrors.NewBadRequest("CardType phải là REGISTERED hoặc GUEST")
 		}
+
+		nextCardType = *req.CardType
 		data["card_type"] = *req.CardType
 	}
 
-	if req.OwnerName != nil {
-		name := strings.TrimSpace(*req.OwnerName)
-		data["owner_name"] = name
+	if nextCardType == CardTypeGuest {
+		data["user_id"] = nil
+	} else {
+		if req.UserID == nil {
+			return nil, appErrors.NewBadRequest("Thẻ REGISTERED bắt buộc phải có user_id")
+		}
+
+		data["user_id"] = *req.UserID
 	}
 
 	if req.IsActive != nil {
@@ -113,6 +120,7 @@ func (s *Service) Update(id uint, req UpdateRfidCardRequest) (*RfidCardResponse,
 
 func (s *Service) FindByUID(uid string) (*RfidCard, error) {
 	uid = strings.TrimSpace(uid)
+
 	if uid == "" {
 		return nil, appErrors.NewBadRequest("UID không được để trống")
 	}
@@ -122,14 +130,15 @@ func (s *Service) FindByUID(uid string) (*RfidCard, error) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, appErrors.NewNotFound("Không tìm thấy thẻ RFID")
 		}
+
 		return nil, appErrors.NewInternal("Lấy thông tin thẻ RFID thất bại")
 	}
 
 	return card, nil
 }
 
-func (s *Service) GetStatistics(registeredDate *time.Time) (*RfidCardStatisticsResponse, error) {
-	total, registered, unregistered, active, registeredOnDate, err := s.repo.CountStatistics(registeredDate)
+func (s *Service) GetStatistics() (*RfidCardStatisticsResponse, error) {
+	total, registered, unregistered, active, err := s.repo.CountStatistics()
 	if err != nil {
 		return nil, appErrors.NewInternal("Thống kê thẻ RFID thất bại")
 	}
@@ -139,29 +148,61 @@ func (s *Service) GetStatistics(registeredDate *time.Time) (*RfidCardStatisticsR
 		RegisteredCards:   registered,
 		UnregisteredCards: unregistered,
 		ActiveCards:       active,
-		RegisteredOnDate:  registeredOnDate,
 	}, nil
 }
 
+func (s *Service) GetByUserID(userID uint) (*MyRfidCardResponse, error) {
+	row, err := s.repo.GetByUserID(userID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, appErrors.NewNotFound("Không tìm thấy thẻ RFID của user")
+		}
+
+		return nil, appErrors.NewInternal("Lấy thẻ RFID của user thất bại")
+	}
+
+	var registeredAt *string
+	if row.CardType == CardTypeRegistered {
+		value := row.CreatedAt.Format("2006-01-02")
+		registeredAt = &value
+	}
+
+	return &MyRfidCardResponse{
+		ID:           row.ID,
+		CardUID:      row.UID,
+		UserID:       row.UserID,
+		OwnerName:    row.OwnerName,
+		Status:       row.CardType,
+		IsActive:     row.IsActive,
+		RegisteredAt: registeredAt,
+	}, nil
+}
+
+func (s *Service) GetUserIDByEmail(email string) (*uint, error) {
+	userID, err := s.repo.GetUserIDByEmail(email)
+	if err != nil {
+		return nil, appErrors.NewInternal("Lấy ID người dùng thất bại")
+	}
+	return userID, nil
+}
+
 func (s *Service) FindWithFilters(
-	lotID *uint,
-	status *CardType,
+	status string,
 	keyword string,
 	page int,
 	pageSize int,
 ) (*RfidCardListResponse, error) {
-	if status != nil && !s.validateCardType(*status) {
-		return nil, appErrors.NewBadRequest("Status phải là REGISTERED hoặc GUEST")
-	}
 
-	rows, total, err := s.repo.FindWithFilters(lotID, status, keyword, page, pageSize)
+	rows, total, err := s.repo.FindWithFilters(status, keyword, page, pageSize)
 	if err != nil {
 		return nil, appErrors.NewInternal("Lấy danh sách thẻ RFID thất bại")
 	}
 
 	items := make([]RfidCardListItem, 0, len(rows))
+
 	for _, row := range rows {
 		var registeredAt *string
+
 		if row.CardType == CardTypeRegistered {
 			value := row.CreatedAt.Format("2006-01-02")
 			registeredAt = &value
@@ -170,9 +211,10 @@ func (s *Service) FindWithFilters(
 		items = append(items, RfidCardListItem{
 			ID:           row.ID,
 			CardUID:      row.UID,
-			PlateNumber:  row.PlateNumber,
-			UserName:     row.OwnerName,
+			UserID:       row.UserID,
+			OwnerName:    row.OwnerName,
 			Status:       row.CardType,
+			IsActive:     row.IsActive,
 			RegisteredAt: registeredAt,
 		})
 	}
@@ -189,11 +231,13 @@ func buildRfidCardListMeta(totalElements int64, page int, pageSize int) RfidCard
 	if page < 1 {
 		page = 1
 	}
+
 	if pageSize < 1 {
 		pageSize = 10
 	}
 
 	totalPages := 0
+
 	if totalElements > 0 {
 		totalPages = int((totalElements + int64(pageSize) - 1) / int64(pageSize))
 	}

@@ -2,7 +2,6 @@ package rfid_card
 
 import (
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -20,7 +19,7 @@ func NewHandler(service *Service) *Handler {
 
 // Create godoc
 // @Summary Tạo thẻ RFID
-// @Description Tạo mới thẻ RFID trong hệ thống
+// @Description Tạo mới thẻ RFID trong hệ thống. Thẻ GUEST không được gán user_id.
 // @Tags rfid_card
 // @Accept json
 // @Produce json
@@ -32,6 +31,7 @@ func NewHandler(service *Service) *Handler {
 // @Router /rfid-cards [post]
 func (h *Handler) Create(c *gin.Context) {
 	var req CreateRfidCardRequest
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.Error(appErrors.NewBadRequest("Dữ liệu không hợp lệ"))
 		return
@@ -67,6 +67,7 @@ func (h *Handler) Update(c *gin.Context) {
 	}
 
 	var req UpdateRfidCardRequest
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.Error(appErrors.NewBadRequest("Dữ liệu không hợp lệ"))
 		return
@@ -87,23 +88,13 @@ func (h *Handler) Update(c *gin.Context) {
 // @Tags rfid_card
 // @Produce json
 // @Security BearerAuth
-// @Param date query string false "Ngày đăng ký (YYYY-MM-DD)"
+// @Param lotId query int false "ID bãi xe"
 // @Success 200 {object} map[string]interface{}
 // @Failure 401 {object} map[string]interface{}
 // @Router /rfid-cards/statistics [get]
 func (h *Handler) GetStatistics(c *gin.Context) {
 
-	var registeredDate *time.Time
-	if dateValue := c.Query("date"); dateValue != "" {
-		parsed, err := time.ParseInLocation("2006-01-02", dateValue, time.Local)
-		if err != nil {
-			c.Error(appErrors.NewBadRequest("date không hợp lệ"))
-			return
-		}
-		registeredDate = &parsed
-	}
-
-	result, err := h.service.GetStatistics(registeredDate)
+	result, err := h.service.GetStatistics()
 	if err != nil {
 		c.Error(err)
 		return
@@ -120,39 +111,70 @@ func (h *Handler) GetStatistics(c *gin.Context) {
 // @Security BearerAuth
 // @Param lotId query int false "ID bãi xe, bỏ trống để lấy toàn bộ"
 // @Param status query string false "REGISTERED hoặc GUEST"
-// @Param keyword query string false "Từ khóa tìm kiếm"
+// @Param keyword query string false "Từ khóa tìm kiếm theo UID, biển số hoặc tên chủ thẻ"
 // @Param page query int false "Trang hiện tại" default(1)
 // @Param pageSize query int false "Số lượng mỗi trang" default(10)
 // @Success 200 {object} map[string]interface{}
 // @Failure 401 {object} map[string]interface{}
 // @Router /rfid-cards [get]
 func (h *Handler) FindWithFilters(c *gin.Context) {
-	var lotID *uint
-	if lotIDValue := c.Query("lotId"); lotIDValue != "" {
-		parsed, err := strconv.ParseUint(lotIDValue, 10, 64)
-		if err != nil {
-			c.Error(appErrors.NewBadRequest("lotId không hợp lệ"))
-			return
-		}
-		value := uint(parsed)
-		lotID = &value
-	}
 
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
 	keyword := c.Query("keyword")
 
-	var status *CardType
-	if statusValue := c.Query("status"); statusValue != "" {
-		value := CardType(statusValue)
-		status = &value
-	}
+	status := c.Query("status")
 
-	result, err := h.service.FindWithFilters(lotID, status, keyword, page, pageSize)
+	result, err := h.service.FindWithFilters(status, keyword, page, pageSize)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
 	response.Success(c, 200, "Lấy danh sách thẻ RFID thành công", result)
+}
+
+// GetMyRfidCard godoc
+// @Summary Lấy thẻ RFID của tôi
+// @Description Lấy thông tin thẻ RFID đang gắn với tài khoản của người dùng hiện tại
+// @Tags rfid_card
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Router /rfid-cards/my-card [get]
+func (h *Handler) GetMyRfidCard(c *gin.Context) {
+	userIDValue, exists := c.Get("user_id")
+	if !exists {
+		c.Error(appErrors.NewUnauthorized("Chưa đăng nhập"))
+		return
+	}
+
+	userID, ok := userIDValue.(uint)
+	if !ok {
+		c.Error(appErrors.NewUnauthorized("userID không hợp lệ"))
+		return
+	}
+
+	card, err := h.service.GetByUserID(userID)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	response.Success(c, 200, "Lấy thẻ RFID của tôi thành công", card)
+}
+
+func (h *Handler) GetUserIDByEmail(c *gin.Context) {
+	email := c.Query("email")
+	if email == "" {
+		c.Error(appErrors.NewBadRequest("Email là bắt buộc"))
+		return
+	}
+	userID, err := h.service.GetUserIDByEmail(email)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	response.Success(c, 200, "Lấy ID người dùng thành công", map[string]interface{}{"user_id": userID})
 }
