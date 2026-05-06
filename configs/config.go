@@ -9,6 +9,7 @@ import (
 
 type Config struct {
 	AppEnv             string
+	FrontendURL        string
 	AppPort            string
 	DBHost             string
 	DBPort             string
@@ -25,6 +26,11 @@ type Config struct {
 	MailPass           string
 	VerifyURL          string
 	CORSAllowedOrigins string
+	PayOSClientID      string
+	PayOSAPIKey        string
+	PayOSChecksumKey   string
+	PayOSReturnURL     string
+	PayOSCancelURL     string
 }
 
 // LoadConfig biến môi trường
@@ -40,6 +46,7 @@ func LoadConfig() *Config {
 
 	cfg := &Config{
 		AppEnv:             appEnv,
+		FrontendURL:        os.Getenv("FRONTEND_URL"),
 		AppPort:            os.Getenv("APP_PORT"),
 		DBHost:             os.Getenv("DB_HOST"),
 		DBPort:             os.Getenv("DB_PORT"),
@@ -56,6 +63,11 @@ func LoadConfig() *Config {
 		MailPass:           os.Getenv("MAIL_PASS"),
 		VerifyURL:          os.Getenv("VERIFY_URL"),
 		CORSAllowedOrigins: os.Getenv("CORS_ALLOWED_ORIGINS"),
+		PayOSClientID:      os.Getenv("PAYOS_CLIENT_ID"),
+		PayOSAPIKey:        os.Getenv("PAYOS_API_KEY"),
+		PayOSChecksumKey:   os.Getenv("PAYOS_CHECKSUM_KEY"),
+		PayOSReturnURL:     os.Getenv("PAYOS_RETURN_URL"),
+		PayOSCancelURL:     os.Getenv("PAYOS_CANCEL_URL"),
 	}
 
 	if cfg.AppPort == "" {

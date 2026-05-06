@@ -1,6 +1,7 @@
 package parking
 
 import (
+	"backend/configs"
 	"context"
 	"crypto/tls"
 	"io"
@@ -40,9 +41,10 @@ type Server struct {
 	server   *webtransport.Server
 	certFile string
 	keyFile  string
+	cfg      *configs.Config
 }
 
-func NewServer(hub *Hub, certFile, keyFile string) *Server {
+func NewServer(hub *Hub, certFile, keyFile string, cfg *configs.Config) *Server {
 	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
 	if err != nil {
 		panic(err)
@@ -64,16 +66,14 @@ func NewServer(hub *Hub, certFile, keyFile string) *Server {
 		hub:      hub,
 		certFile: certFile,
 		keyFile:  keyFile,
+		cfg:      cfg,
 		server: &webtransport.Server{
 			H3: h3Server,
 			CheckOrigin: func(r *http.Request) bool {
 				origin := r.Header.Get("Origin")
 				log.Println("[WT] Origin:", origin)
 
-				return origin == "http://localhost:3000" ||
-					origin == "https://localhost:3000" ||
-					origin == "http://127.0.0.1:3000" ||
-					origin == "https://127.0.0.1:3000"
+				return origin == cfg.FrontendURL
 			},
 		},
 	}
