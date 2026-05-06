@@ -95,20 +95,19 @@ func seed(db *sql.DB) error {
 
 	// RFID Cards
 	rfidQuery := `
-		INSERT INTO rfid_cards (uid, card_type, owner_name, is_active)
-		VALUES (?, ?, ?, ?)
+		INSERT INTO rfid_cards (uid, card_type, is_active)
+		VALUES (?, ?, ?)
 		ON DUPLICATE KEY UPDATE
 			card_type = VALUES(card_type),
-			owner_name = VALUES(owner_name),
 			is_active = VALUES(is_active)
 	`
 
-	_, err = db.Exec(rfidQuery, "GUEST001", "GUEST", nil, true)
+	_, err = db.Exec(rfidQuery, "GUEST001", "GUEST", true)
 	if err != nil {
 		return fmt.Errorf("lỗi seed thẻ GUEST001: %v", err)
 	}
 
-	_, err = db.Exec(rfidQuery, "USER001", "REGISTERED", "Nguyen Van A", true)
+	_, err = db.Exec(rfidQuery, "USER001", "REGISTERED", true)
 	if err != nil {
 		return fmt.Errorf("lỗi seed thẻ USER001: %v", err)
 	}
