@@ -47,8 +47,8 @@ func (s *Service) FindWithPagination(page, pageSize int, search string) (*UserPa
 	}, nil
 }
 
-// GetUserByID lấy thông tin người dùng theo ID
-func (s *Service) GetUserByID(id uint) (*UserResponse, error) {
+// Get My Info
+func (s *Service) GetMyInfo(id uint) (*MyAccountResponse, error) {
 	user, err := s.repo.FindByID(id)
 	if err != nil {
 		return nil, appErrors.NewInternal("Lấy thông tin người dùng thất bại")
@@ -56,12 +56,13 @@ func (s *Service) GetUserByID(id uint) (*UserResponse, error) {
 	if user == nil {
 		return nil, appErrors.NewNotFound("Người dùng không tồn tại!")
 	}
-	return &UserResponse{
+	return &MyAccountResponse{
 		ID:        user.ID,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Email:     user.Email,
 		Role:      user.Role,
+		Money:     user.Money,
 	}, nil
 }
 

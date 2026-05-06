@@ -66,7 +66,7 @@ func (h *Handler) GetMyInfo(c *gin.Context) {
 		return
 	}
 
-	user, err := h.service.GetUserByID(userID)
+	user, err := h.service.GetMyInfo(userID)
 	if err != nil {
 		c.Error(err)
 		return

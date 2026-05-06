@@ -18,6 +18,7 @@ type User struct {
 	Password   string    `gorm:"type:varchar(255);not null"`
 	Role       Role      `gorm:"type:enum('USER','MANAGER','ADMIN');default:'USER';not null"`
 	IsVerified bool      `gorm:"default:false;not null"`
+	Money      int64     `gorm:"column:money;not null;default:0" json:"money"`
 	CreatedAt  time.Time `gorm:"autoCreateTime"`
 	UpdatedAt  time.Time `gorm:"autoUpdateTime"`
 }
