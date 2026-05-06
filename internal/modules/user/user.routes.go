@@ -7,7 +7,7 @@ func RegisterRoutes(api *gin.RouterGroup, handler *Handler, authMiddleware, admi
 	group.Use(authMiddleware)
 	{
 		// Lấy danh sách người dùng với phân trang
-		group.GET("/", adminOnly, handler.FindWithPagination)
+		group.GET("/user-pagination", adminOnly, handler.FindWithPagination)
 
 		// Lấy thông tin người dùng hiện tại
 		group.GET("/my-info", handler.GetMyInfo)

@@ -109,9 +109,9 @@ func main() {
 
 		wtServer := parking.NewServer(parkingHub, certPath, keyPath)
 
-		log.Printf("[WT] starting WebTransport server on :8443 (cert: %s, key: %s)", certPath, keyPath)
+		log.Printf("[WT] starting WebTransport server on :4433 (cert: %s, key: %s)", certPath, keyPath)
 
-		if err := wtServer.Run(":8443"); err != nil {
+		if err := wtServer.Run(":4433"); err != nil {
 			log.Printf("[WT] server stopped: %v", err)
 		}
 	}()

@@ -250,7 +250,7 @@ go test ./...
 
 ## 12) Notes triển khai
 
-- Nếu muốn bật WebTransport server (`:8443`), cần cung cấp `cert.pem` và `key.pem` ở root project.
+- Nếu muốn bật WebTransport server (`:4433`), cần cung cấp `cert.pem` và `key.pem` ở root project.
 - CORS được kiểm soát qua `CORS_ALLOWED_ORIGINS`.
 - `VERIFY_URL` là bắt buộc theo config loader.
 

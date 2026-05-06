@@ -21,7 +21,7 @@ func (s *wtSession) Send(data []byte) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	str, err := s.session.OpenStreamSync(ctx)
+	str, err := s.session.OpenUniStreamSync(ctx)
 	if err != nil {
 		return err
 	}
@@ -48,18 +48,24 @@ func NewServer(hub *Hub, certFile, keyFile string) *Server {
 		panic(err)
 	}
 
+	h3Server := &http3.Server{
+		TLSConfig: &tls.Config{
+			Certificates: []tls.Certificate{cert},
+			MinVersion:   tls.VersionTLS13,
+			NextProtos:   []string{"h3"},
+		},
+	}
+
+	// Bắt buộc phải gọi ConfigureHTTP3Server để bật WebTransport support
+	// (enable datagrams, thêm SETTINGS enable_webtransport=1, setup ConnContext)
+	webtransport.ConfigureHTTP3Server(h3Server)
+
 	return &Server{
 		hub:      hub,
 		certFile: certFile,
 		keyFile:  keyFile,
 		server: &webtransport.Server{
-			H3: &http3.Server{
-				TLSConfig: &tls.Config{
-					Certificates: []tls.Certificate{cert},
-					MinVersion:   tls.VersionTLS13,
-					NextProtos:   []string{"h3"},
-				},
-			},
+			H3: h3Server,
 			CheckOrigin: func(r *http.Request) bool {
 				origin := r.Header.Get("Origin")
 				log.Println("[WT] Origin:", origin)
