@@ -15,7 +15,7 @@ type ParkingSession struct {
 	PlateNumber string             `gorm:"type:varchar(20);not null;index" json:"plate_number"`
 	EntryTime   time.Time          `gorm:"not null;autoCreateTime;index" json:"entry_time"`
 	ExitTime    *time.Time         `json:"exit_time,omitempty"`
-	Fee         *float64           `json:"fee,omitempty"`
+	Fee         int64              `json:"fee,omitempty"`
 	IsActive    bool               `gorm:"not null;default:true;index" json:"is_active"`
 }
 

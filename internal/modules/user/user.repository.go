@@ -106,3 +106,23 @@ func (r *Repository) UpdateProfile(id uint, first_name, last_name *string) (*Use
 
 	return r.FindByID(id)
 }
+
+// Lấy số tiền hiện tại trong ví của người dùng
+func (r *Repository) GetWalletBalance(userID uint) (int64, error) {
+	var user User
+	err := r.db.Select("money").First(&user, userID).Error
+	if err != nil {
+		return 0, err
+	}
+	return user.Money, nil
+}
+
+// DepositToWallet nạp tiền vào ví của người dùng
+func (r *Repository) DepositToWallet(userID uint, amount int64) error {
+	return r.db.Model(&User{}).Where("id = ?", userID).UpdateColumn("money", gorm.Expr("money + ?", amount)).Error
+}
+
+// WithdrawFromWallet rút tiền từ ví của người dùng
+func (r *Repository) WithdrawFromWallet(userID uint, amount int64) error {
+	return r.db.Model(&User{}).Where("id = ?", userID).UpdateColumn("money", gorm.Expr("money - ?", amount)).Error
+}

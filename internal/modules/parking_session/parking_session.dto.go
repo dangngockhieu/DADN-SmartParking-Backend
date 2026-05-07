@@ -11,7 +11,7 @@ type ParkingSessionResponse struct {
 	PlateNumber string     `json:"plate_number"`
 	EntryTime   time.Time  `json:"entry_time"`
 	ExitTime    *time.Time `json:"exit_time,omitempty"`
-	Fee         *float64   `json:"fee,omitempty"`
+	Fee         int64      `json:"fee,omitempty"`
 	IsActive    bool       `json:"is_active"`
 }
 
@@ -24,7 +24,7 @@ type ManageParkingSessionResponse struct {
 	PlateNumber string     `json:"plate_number"`
 	EntryTime   time.Time  `json:"entry_time"`
 	ExitTime    *time.Time `json:"exit_time,omitempty"`
-	Fee         *float64   `json:"fee,omitempty"`
+	Fee         int64      `json:"fee,omitempty"`
 	IsActive    bool       `json:"is_active"`
 	OwnerName   *string    `json:"owner_name"`
 }
@@ -59,6 +59,6 @@ type AssignSlotInput struct {
 }
 
 type FinishParkingSessionInput struct {
-	SessionID uint    `json:"session_id"`
-	Fee       float64 `json:"fee"`
+	SessionID uint  `json:"session_id"`
+	Fee       int64 `json:"fee"`
 }

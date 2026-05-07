@@ -166,3 +166,34 @@ func (s *Service) ChangeProfile(userID uint, req ChangeProfileRequest) (*UserRes
 		Role:      updatedUser.Role,
 	}, nil
 }
+
+// GetWalletBalance lấy số tiền hiện tại trong ví của người dùng
+func (s *Service) GetWalletBalance(userID uint) (int64, error) {
+	balance, err := s.repo.GetWalletBalance(userID)
+	if err != nil {
+		return 0, appErrors.NewInternal("Lấy số tiền trong ví thất bại")
+	}
+	return balance, nil
+}
+
+// Cộng tiền vào ví của người dùng
+func (s *Service) DepositToWallet(userID uint, amount int64) error {
+	if amount <= 0 {
+		return appErrors.NewBadRequest("Số tiền phải lớn hơn 0")
+	}
+	if err := s.repo.DepositToWallet(userID, amount); err != nil {
+		return appErrors.NewInternal("Cộng tiền vào ví thất bại")
+	}
+	return nil
+}
+
+// Trừ tiền từ ví của người dùng
+func (s *Service) WithdrawFromWallet(userID uint, amount int64) error {
+	if amount <= 0 {
+		return appErrors.NewBadRequest("Số tiền phải lớn hơn 0")
+	}
+	if err := s.repo.WithdrawFromWallet(userID, amount); err != nil {
+		return appErrors.NewInternal("Trừ tiền từ ví thất bại")
+	}
+	return nil
+}
