@@ -1,6 +1,7 @@
 package gate
 
 import (
+	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -40,7 +41,7 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 201, "Tạo cổng thành công", ToGateResponse(gate))
+	response.Success(c, http.StatusCreated, "Tạo cổng thành công", ToGateResponse(gate))
 }
 
 // Update godoc
@@ -73,7 +74,7 @@ func (h *Handler) Update(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Cập nhật cổng thành công", ToGateResponse(gate))
+	response.Success(c, http.StatusOK, "Cập nhật cổng thành công", ToGateResponse(gate))
 }
 
 // ─── helper ──────────────────────────────────────────────────────────────────

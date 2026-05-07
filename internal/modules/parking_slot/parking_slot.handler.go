@@ -1,6 +1,7 @@
 package parking_slot
 
 import (
+	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -42,7 +43,7 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 201, "Tạo vị trí đỗ thành công", slot)
+	response.Success(c, http.StatusCreated, "Tạo vị trí đỗ thành công", slot)
 }
 
 // FindByID godoc
@@ -69,7 +70,7 @@ func (h *Handler) FindByID(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Lấy thông tin vị trí đỗ thành công", slot)
+	response.Success(c, http.StatusOK, "Lấy thông tin vị trí đỗ thành công", slot)
 }
 
 // AdminUpdateStatus godoc
@@ -104,7 +105,7 @@ func (h *Handler) AdminUpdateStatus(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, result.Message, result)
+	response.Success(c, http.StatusOK, result.Message, result)
 }
 
 // SensorUpdateStatus godoc
@@ -130,7 +131,7 @@ func (h *Handler) SensorUpdateStatus(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, result.Message, result)
+	response.Success(c, http.StatusOK, result.Message, result)
 }
 
 // ChangeDevice godoc
@@ -165,5 +166,5 @@ func (h *Handler) ChangeDevice(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Cập nhật thiết bị thành công", nil)
+	response.Success(c, http.StatusOK, "Cập nhật thiết bị thành công", nil)
 }

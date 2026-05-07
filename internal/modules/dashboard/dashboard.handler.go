@@ -1,6 +1,8 @@
 package dashboard
 
 import (
+	"net/http"
+
 	appErrors "backend/internal/common/errors"
 	"backend/pkg/response"
 
@@ -38,5 +40,5 @@ func (h *Handler) GetParkingFlow(c *gin.Context) {
 		_ = c.Error(err)
 		return
 	}
-	response.Success(c, 200, "Lấy thông tin lưu lượng xe thành công", result)
+	response.Success(c, http.StatusOK, "Lấy thông tin lưu lượng xe thành công", result)
 }

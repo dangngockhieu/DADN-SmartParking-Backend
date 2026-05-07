@@ -1,6 +1,8 @@
 package iot_gateway
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 
 	appErrors "backend/internal/common/errors"
@@ -38,7 +40,7 @@ func (h *Handler) CameraPlate(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, result.Message, result)
+	response.Success(c, http.StatusOK, result.Message, result)
 }
 
 // RfidScan godoc
@@ -64,5 +66,5 @@ func (h *Handler) RfidScan(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, result.Message, result)
+	response.Success(c, http.StatusOK, result.Message, result)
 }

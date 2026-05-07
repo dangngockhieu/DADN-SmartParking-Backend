@@ -1,6 +1,7 @@
 package iot_device
 
 import (
+	"net/http"
 	"net/url"
 
 	"github.com/gin-gonic/gin"
@@ -42,7 +43,7 @@ func (h *Handler) CreateDevice(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 201, "Tao thiet bi IoT thanh cong", device)
+	response.Success(c, http.StatusCreated, "Tao thiet bi IoT thanh cong", device)
 }
 
 // FindAllDevices godoc
@@ -70,7 +71,7 @@ func (h *Handler) FindAllDevices(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Lay danh sach thiet bi IoT thanh cong", devices)
+	response.Success(c, http.StatusOK, "Lay danh sach thiet bi IoT thanh cong", devices)
 }
 
 // UpdateDevice godoc
@@ -107,5 +108,5 @@ func (h *Handler) UpdateDevice(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Cap nhat thiet bi IoT thanh cong", device)
+	response.Success(c, http.StatusOK, "Cap nhat thiet bi IoT thanh cong", device)
 }

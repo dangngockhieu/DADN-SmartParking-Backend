@@ -1,6 +1,7 @@
 package parking_lot
 
 import (
+	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -42,7 +43,7 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 201, "Tạo bãi đỗ thành công", lot)
+	response.Success(c, http.StatusCreated, "Tạo bãi đỗ thành công", lot)
 }
 
 // FindAll godoc
@@ -61,7 +62,7 @@ func (h *Handler) FindAll(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Lấy danh sách bãi đỗ thành công", lots)
+	response.Success(c, http.StatusOK, "Lấy danh sách bãi đỗ thành công", lots)
 }
 
 // FindByID godoc
@@ -88,7 +89,7 @@ func (h *Handler) FindByID(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Lấy thông tin bãi đỗ thành công", lot)
+	response.Success(c, http.StatusOK, "Lấy thông tin bãi đỗ thành công", lot)
 }
 
 // GetGatesByLotID godoc
@@ -113,7 +114,7 @@ func (h *Handler) GetGatesByLotID(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Lấy danh sách cổng thành công", gates)
+	response.Success(c, http.StatusOK, "Lấy danh sách cổng thành công", gates)
 }
 
 // Update godoc
@@ -148,5 +149,5 @@ func (h *Handler) Update(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Cập nhật bãi đỗ thành công", lot)
+	response.Success(c, http.StatusOK, "Cập nhật bãi đỗ thành công", lot)
 }

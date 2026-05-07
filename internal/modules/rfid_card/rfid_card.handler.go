@@ -1,6 +1,7 @@
 package rfid_card
 
 import (
+	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -43,7 +44,7 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 201, "Tạo thẻ RFID thành công", card)
+	response.Success(c, http.StatusCreated, "Tạo thẻ RFID thành công", card)
 }
 
 // Update godoc
@@ -79,7 +80,7 @@ func (h *Handler) Update(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Cập nhật thẻ RFID thành công", card)
+	response.Success(c, http.StatusOK, "Cập nhật thẻ RFID thành công", card)
 }
 
 // GetStatistics godoc
@@ -100,7 +101,7 @@ func (h *Handler) GetStatistics(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Lấy thống kê thẻ RFID thành công", result)
+	response.Success(c, http.StatusOK, "Lấy thống kê thẻ RFID thành công", result)
 }
 
 // FindWithFilters godoc
@@ -131,7 +132,7 @@ func (h *Handler) FindWithFilters(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Lấy danh sách thẻ RFID thành công", result)
+	response.Success(c, http.StatusOK, "Lấy danh sách thẻ RFID thành công", result)
 }
 
 // GetMyRfidCard godoc
@@ -162,7 +163,7 @@ func (h *Handler) GetMyRfidCard(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Lấy thẻ RFID của tôi thành công", card)
+	response.Success(c, http.StatusOK, "Lấy thẻ RFID của tôi thành công", card)
 }
 
 func (h *Handler) GetUserIDByEmail(c *gin.Context) {
@@ -176,5 +177,5 @@ func (h *Handler) GetUserIDByEmail(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	response.Success(c, 200, "Lấy ID người dùng thành công", map[string]interface{}{"user_id": userID})
+	response.Success(c, http.StatusOK, "Lấy ID người dùng thành công", map[string]interface{}{"user_id": userID})
 }

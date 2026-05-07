@@ -1,6 +1,7 @@
 package parking_session
 
 import (
+	"net/http"
 	"strconv"
 	"time"
 
@@ -59,7 +60,7 @@ func (h *Handler) FindAll(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Lấy danh sách phiên gửi xe theo ngày thành công", result)
+	response.Success(c, http.StatusOK, "Lấy danh sách phiên gửi xe theo ngày thành công", result)
 }
 
 // GetByDate godoc
@@ -116,5 +117,5 @@ func (h *Handler) GetByDate(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Lấy danh sách phiên gửi xe theo ngày thành công", result)
+	response.Success(c, http.StatusOK, "Lấy danh sách phiên gửi xe theo ngày thành công", result)
 }

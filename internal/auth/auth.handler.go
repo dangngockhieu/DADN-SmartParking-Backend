@@ -50,7 +50,7 @@ func (h *Handler) Register(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 201, "Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.", nil)
+	response.Success(c, http.StatusCreated, "Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.", nil)
 }
 
 // VerifyEmail godoc
@@ -113,7 +113,7 @@ func (h *Handler) ResendVerification(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Resend email successful", nil)
+	response.Success(c, http.StatusOK, "Resend email successful", nil)
 }
 
 // Login godoc
@@ -154,7 +154,7 @@ func (h *Handler) Login(c *gin.Context) {
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie("refresh_token", refreshToken, 7*24*60*60, "/", "", false, true)
 
-	response.Success(c, 200, "Đăng nhập thành công", data)
+	response.Success(c, http.StatusOK, "Đăng nhập thành công", data)
 }
 
 // Logout godoc
@@ -199,7 +199,7 @@ func (h *Handler) Logout(c *gin.Context) {
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie("refresh_token", "", -1, "/", "", false, true)
 
-	response.Success(c, 200, "Đăng xuất thành công", nil)
+	response.Success(c, http.StatusOK, "Đăng xuất thành công", nil)
 }
 
 // RefreshToken godoc
@@ -224,7 +224,7 @@ func (h *Handler) RefreshToken(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Làm mới token thành công", data)
+	response.Success(c, http.StatusOK, "Làm mới token thành công", data)
 }
 
 // SendResetPassword godoc
@@ -250,7 +250,7 @@ func (h *Handler) SendResetPassword(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Password reset email sent successfully", nil)
+	response.Success(c, http.StatusOK, "Password reset email sent successfully", nil)
 }
 
 // ResetPassword godoc
@@ -276,5 +276,5 @@ func (h *Handler) ResetPassword(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Password reset successfully", nil)
+	response.Success(c, http.StatusOK, "Password reset successfully", nil)
 }

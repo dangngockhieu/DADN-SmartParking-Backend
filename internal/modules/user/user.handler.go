@@ -1,6 +1,7 @@
 package user
 
 import (
+	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -41,7 +42,7 @@ func (h *Handler) FindWithPagination(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Lấy danh sách người dùng thành công", result)
+	response.Success(c, http.StatusOK, "Lấy danh sách người dùng thành công", result)
 }
 
 // GetMyInfo godoc
@@ -72,7 +73,7 @@ func (h *Handler) GetMyInfo(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Lấy thông tin người dùng thành công", user)
+	response.Success(c, http.StatusOK, "Lấy thông tin người dùng thành công", user)
 }
 
 // CreateByAdmin godoc
@@ -100,7 +101,7 @@ func (h *Handler) CreateByAdmin(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 201, "Tạo người dùng thành công", nil)
+	response.Success(c, http.StatusCreated, "Tạo người dùng thành công", nil)
 }
 
 // ChangePassword godoc
@@ -140,7 +141,7 @@ func (h *Handler) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Đổi mật khẩu thành công", nil)
+	response.Success(c, http.StatusOK, "Đổi mật khẩu thành công", nil)
 }
 
 // ChangeRole godoc
@@ -175,7 +176,7 @@ func (h *Handler) ChangeRole(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Đổi vai trò thành công", nil)
+	response.Success(c, http.StatusOK, "Đổi vai trò thành công", nil)
 }
 
 // UpdateProfile godoc
@@ -208,5 +209,5 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	response.Success(c, 200, "Cập nhật thông tin thành công", updatedUser)
+	response.Success(c, http.StatusOK, "Cập nhật thông tin thành công", updatedUser)
 }
