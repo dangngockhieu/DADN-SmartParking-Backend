@@ -29,7 +29,7 @@ func (s *Service) Create(req *CreateGateRequest) (*Gate, error) {
 }
 
 // FindByID lấy thông tin cổng theo ID
-func (s *Service) FindByID(id uint) (*Gate, error) {
+func (s *Service) FindByID(id uint64) (*Gate, error) {
 	gate, err := s.repo.FindByID(id)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -41,7 +41,7 @@ func (s *Service) FindByID(id uint) (*Gate, error) {
 }
 
 // Update cập nhật thông tin cổng
-func (s *Service) Update(id uint, req *UpdateGateRequest) (*Gate, error) {
+func (s *Service) Update(id uint64, req *UpdateGateRequest) (*Gate, error) {
 	gate, err := s.FindByID(id)
 	if err != nil {
 		return nil, err

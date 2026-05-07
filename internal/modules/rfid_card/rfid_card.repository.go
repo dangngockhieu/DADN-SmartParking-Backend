@@ -21,7 +21,7 @@ func (r *Repository) Create(card *RfidCard) error {
 }
 
 // FindByID tìm kiếm thẻ RFID theo ID
-func (r *Repository) FindByID(id uint) (*RfidCard, error) {
+func (r *Repository) FindByID(id uint64) (*RfidCard, error) {
 	var card RfidCard
 	err := r.db.First(&card, id).Error
 	if err != nil {
@@ -31,17 +31,17 @@ func (r *Repository) FindByID(id uint) (*RfidCard, error) {
 }
 
 type RfidCardDetailRow struct {
-	ID        uint
+	ID        uint64
 	UID       string
 	CardType  CardType
-	UserID    *uint
+	UserID    *uint64
 	OwnerName *string
 	IsActive  bool
 	CreatedAt time.Time
 }
 
 // Lấy thẻ theo userId
-func (r *Repository) GetByUserID(userID uint) (*RfidCardDetailRow, error) {
+func (r *Repository) GetByUserID(userID uint64) (*RfidCardDetailRow, error) {
 	var row RfidCardDetailRow
 
 	err := r.db.Table("rfid_cards AS rc").
@@ -69,7 +69,7 @@ func (r *Repository) GetByUserID(userID uint) (*RfidCardDetailRow, error) {
 }
 
 // Update thẻ RFID theo ID với dữ liệu mới
-func (r *Repository) UpdateByID(id uint, data map[string]any) error {
+func (r *Repository) UpdateByID(id uint64, data map[string]any) error {
 	return r.db.Model(&RfidCard{}).Where("id = ?", id).Session(&gorm.Session{}).UpdateColumns(data).Error
 }
 
@@ -83,10 +83,10 @@ func (r *Repository) FindByUID(uid string) (*RfidCard, error) {
 }
 
 type RfidCardListRow struct {
-	ID          uint
+	ID          uint64
 	UID         string
 	CardType    CardType
-	UserID      *uint
+	UserID      *uint64
 	OwnerName   *string
 	IsActive    bool
 	CreatedAt   time.Time
@@ -206,8 +206,8 @@ func (r *Repository) FindWithFilters(
 	return rows, total, nil
 }
 
-func (r *Repository) GetUserIDByEmail(email string) (*uint, error) {
-	var userID uint
+func (r *Repository) GetUserIDByEmail(email string) (*uint64, error) {
+	var userID uint64
 	if err := r.db.Table("users").
 		Select("id").
 		Where("email = ?", email).

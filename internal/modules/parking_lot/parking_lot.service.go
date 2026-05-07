@@ -65,7 +65,7 @@ func (s *Service) FindAll() ([]ParkingLotResponse, error) {
 }
 
 // Lấy thông tin chi tiết bãi đỗ theo ID, bao gồm danh sách slot và thống kê
-func (s *Service) FindByID(id uint) (*ParkingLotDetailResponse, error) {
+func (s *Service) FindByID(id uint64) (*ParkingLotDetailResponse, error) {
 	lot, err := s.repo.FindByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -108,7 +108,7 @@ func (s *Service) FindByID(id uint) (*ParkingLotDetailResponse, error) {
 }
 
 // Lấy danh sách cổng của bãi đỗ theo ID
-func (s *Service) FindGatesByLotID(lotID uint) ([]ParkingLotGateResponse, error) {
+func (s *Service) FindGatesByLotID(lotID uint64) ([]ParkingLotGateResponse, error) {
 	gates, err := s.repo.FindGatesByLotID(lotID)
 	if err != nil {
 		return nil, appErrors.NewInternal("Lấy danh sách cổng thất bại")
@@ -116,7 +116,7 @@ func (s *Service) FindGatesByLotID(lotID uint) ([]ParkingLotGateResponse, error)
 	return gates, nil
 }
 
-func (s *Service) Update(id uint, req UpdateParkingLotRequest) (*ParkingLotResponse, error) {
+func (s *Service) Update(id uint64, req UpdateParkingLotRequest) (*ParkingLotResponse, error) {
 	data := map[string]interface{}{}
 
 	if req.Name != nil {

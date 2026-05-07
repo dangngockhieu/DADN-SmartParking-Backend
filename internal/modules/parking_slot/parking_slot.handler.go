@@ -63,7 +63,7 @@ func (h *Handler) FindByID(c *gin.Context) {
 		return
 	}
 
-	slot, err := h.service.FindByID(uint(id64))
+	slot, err := h.service.FindByID(uint64(id64))
 	if err != nil {
 		c.Error(err)
 		return
@@ -98,7 +98,7 @@ func (h *Handler) AdminUpdateStatus(c *gin.Context) {
 		return
 	}
 
-	result, err := h.service.AdminUpdateStatus(uint(id64), req)
+	result, err := h.service.AdminUpdateStatus(uint64(id64), req)
 	if err != nil {
 		c.Error(err)
 		return
@@ -159,7 +159,7 @@ func (h *Handler) ChangeDevice(c *gin.Context) {
 		return
 	}
 
-	_, err = h.service.ChangeDevice(uint(id64), req)
+	_, err = h.service.ChangeDevice(uint64(id64), req)
 	if err != nil {
 		c.Error(err)
 		return

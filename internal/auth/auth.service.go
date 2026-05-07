@@ -50,12 +50,12 @@ func normalizeEmail(email string) string {
 }
 
 // Tạo key Redis cho các mục đích khác nhau, giúp tránh trùng lặp và dễ quản lý
-func verifyEmailKey(r *database.RedisClient, userID uint) string {
+func verifyEmailKey(r *database.RedisClient, userID uint64) string {
 	return r.Key("auth", "verify_email", "user", userID)
 }
 
 // Định nghĩa các key khác như resetPasswordKey, loginFailEmailKey, loginFailIPKey, revokedAccessKey
-func resetPasswordKey(r *database.RedisClient, userID uint) string {
+func resetPasswordKey(r *database.RedisClient, userID uint64) string {
 	return r.Key("auth", "reset_password", "user", userID)
 }
 
@@ -296,7 +296,7 @@ func (s *Service) Login(u *user.User, device, ip string) (*LoginResponse, string
 }
 
 // Logout xóa refresh token và lưu JTI của access token đã bị thu hồi để middleware có thể kiểm tra
-func (s *Service) Logout(userID uint, refreshToken, accessJTI string, accessTTL time.Duration) error {
+func (s *Service) Logout(userID uint64, refreshToken, accessJTI string, accessTTL time.Duration) error {
 	if refreshToken != "" {
 		tokens, err := s.repo.FindRefreshTokensByUserID(userID)
 		if err != nil {

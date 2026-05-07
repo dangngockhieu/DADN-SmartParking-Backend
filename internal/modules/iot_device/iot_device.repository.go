@@ -14,7 +14,7 @@ type IoTDeviceWithLot struct {
 	MacAddress string       `gorm:"column:mac_address"`
 	DeviceName *string      `gorm:"column:device_name"`
 	Status     DeviceStatus `gorm:"column:status"`
-	LotID      *uint        `gorm:"column:lot_id"`
+	LotID      *uint64      `gorm:"column:lot_id"`
 	LotName    *string      `gorm:"column:lot_name"`
 	LastSeen   *time.Time   `gorm:"column:last_seen"`
 	CreatedAt  time.Time    `gorm:"column:created_at"`

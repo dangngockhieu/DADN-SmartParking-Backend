@@ -29,7 +29,7 @@ type ResetPasswordRequest struct {
 }
 
 type LoginUserResponse struct {
-	ID        uint   `json:"id"`
+	ID        uint64 `json:"id"`
 	Email     string `json:"email"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`

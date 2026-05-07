@@ -73,7 +73,7 @@ func (h *Handler) Update(c *gin.Context) {
 		return
 	}
 
-	card, err := h.service.Update(uint(id64), req)
+	card, err := h.service.Update(uint64(id64), req)
 	if err != nil {
 		c.Error(err)
 		return
@@ -150,7 +150,7 @@ func (h *Handler) GetMyRfidCard(c *gin.Context) {
 		return
 	}
 
-	userID, ok := userIDValue.(uint)
+	userID, ok := userIDValue.(uint64)
 	if !ok {
 		c.Error(appErrors.NewUnauthorized("userID không hợp lệ"))
 		return

@@ -65,7 +65,7 @@ func (s *Service) Create(req CreateRfidCardRequest) (*RfidCardResponse, error) {
 	return s.toResponse(card), nil
 }
 
-func (s *Service) Update(id uint, req UpdateRfidCardRequest) (*RfidCardResponse, error) {
+func (s *Service) Update(id uint64, req UpdateRfidCardRequest) (*RfidCardResponse, error) {
 	currentCard, err := s.repo.FindByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -151,7 +151,7 @@ func (s *Service) GetStatistics() (*RfidCardStatisticsResponse, error) {
 	}, nil
 }
 
-func (s *Service) GetByUserID(userID uint) (*MyRfidCardResponse, error) {
+func (s *Service) GetByUserID(userID uint64) (*MyRfidCardResponse, error) {
 	row, err := s.repo.GetByUserID(userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -178,7 +178,7 @@ func (s *Service) GetByUserID(userID uint) (*MyRfidCardResponse, error) {
 	}, nil
 }
 
-func (s *Service) GetUserIDByEmail(email string) (*uint, error) {
+func (s *Service) GetUserIDByEmail(email string) (*uint64, error) {
 	userID, err := s.repo.GetUserIDByEmail(email)
 	if err != nil {
 		return nil, appErrors.NewInternal("Lấy ID người dùng thất bại")

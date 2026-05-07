@@ -82,7 +82,7 @@ func (h *Handler) FindByID(c *gin.Context) {
 		return
 	}
 
-	lot, err := h.service.FindByID(uint(id64))
+	lot, err := h.service.FindByID(uint64(id64))
 	if err != nil {
 		c.Error(err)
 		return
@@ -107,7 +107,7 @@ func (h *Handler) GetGatesByLotID(c *gin.Context) {
 		return
 	}
 
-	gates, err := h.service.FindGatesByLotID(uint(id64))
+	gates, err := h.service.FindGatesByLotID(uint64(id64))
 	if err != nil {
 		c.Error(err)
 		return
@@ -142,7 +142,7 @@ func (h *Handler) Update(c *gin.Context) {
 		return
 	}
 
-	lot, err := h.service.Update(uint(id64), req)
+	lot, err := h.service.Update(uint64(id64), req)
 	if err != nil {
 		c.Error(err)
 		return

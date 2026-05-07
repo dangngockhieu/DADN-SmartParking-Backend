@@ -10,10 +10,10 @@ const (
 )
 
 type RfidCard struct {
-	ID        uint      `gorm:"primaryKey;autoIncrement" json:"id"`
+	ID        uint64    `gorm:"primaryKey;autoIncrement" json:"id"`
 	UID       string    `gorm:"type:varchar(20);not null;uniqueIndex" json:"uid"`
 	CardType  CardType  `gorm:"type:enum('REGISTERED','GUEST');not null;default:'REGISTERED'" json:"card_type"`
-	UserID    *uint     `gorm:"column:user_id" json:"user_id,omitempty"`
+	UserID    *uint64   `gorm:"column:user_id" json:"user_id,omitempty"`
 	IsActive  bool      `gorm:"not null;default:true" json:"is_active"`
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"`

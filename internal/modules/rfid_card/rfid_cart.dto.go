@@ -3,29 +3,29 @@ package rfid_card
 type CreateRfidCardRequest struct {
 	UID      string   `json:"uid" binding:"required"`
 	CardType CardType `json:"card_type" binding:"required"`
-	UserID   *uint    `json:"user_id"`
+	UserID   *uint64  `json:"user_id"`
 }
 
 type UpdateRfidCardRequest struct {
 	CardType *CardType `json:"card_type"`
-	UserID   *uint     `json:"user_id"`
+	UserID   *uint64   `json:"user_id"`
 	IsActive *bool     `json:"is_active"`
 }
 
 type RfidCardResponse struct {
-	ID        uint     `json:"id"`
+	ID        uint64   `json:"id"`
 	UID       string   `json:"uid"`
 	CardType  CardType `json:"card_type"`
-	UserID    *uint    `json:"user_id,omitempty"`
+	UserID    *uint64  `json:"user_id,omitempty"`
 	IsActive  bool     `json:"is_active"`
 	CreatedAt string   `json:"created_at"`
 	UpdatedAt string   `json:"updated_at"`
 }
 
 type MyRfidCardResponse struct {
-	ID           uint     `json:"id"`
+	ID           uint64   `json:"id"`
 	CardUID      string   `json:"cardUid"`
-	UserID       *uint    `json:"userId"`
+	UserID       *uint64  `json:"userId"`
 	OwnerName    *string  `json:"ownerName"`
 	Status       CardType `json:"status"`
 	IsActive     bool     `json:"isActive"`
@@ -40,9 +40,9 @@ type RfidCardStatisticsResponse struct {
 }
 
 type RfidCardListItem struct {
-	ID           uint     `json:"id"`
+	ID           uint64   `json:"id"`
 	CardUID      string   `json:"cardUid"`
-	UserID       *uint    `json:"userId"`
+	UserID       *uint64  `json:"userId"`
 	OwnerName    *string  `json:"ownerName"`
 	Status       CardType `json:"status"`
 	IsActive     bool     `json:"isActive"`

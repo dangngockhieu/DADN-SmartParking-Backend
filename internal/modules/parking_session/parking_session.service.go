@@ -166,7 +166,7 @@ func (s *Service) FindActiveByPlateNumber(plateNumber string) (*ParkingSession, 
 // Lấy danh sách phiên gửi xe theo ngày và userID
 func (s *Service) GetByDate(
 	date time.Time,
-	userID uint,
+	userID uint64,
 	page int,
 	pageSize int,
 ) (*ParkingSessionListResponse, error) {

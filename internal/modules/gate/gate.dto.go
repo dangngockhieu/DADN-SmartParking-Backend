@@ -6,7 +6,7 @@ type CreateGateRequest struct {
 	Name       string   `json:"name"        binding:"required,max=50"`
 	Type       GateType `json:"type"        binding:"required,oneof=ENTRY EXIT"`
 	MacAddress string   `json:"mac_address" binding:"required,max=50"`
-	LotID      uint     `json:"lot_id"      binding:"required"`
+	LotID      uint64   `json:"lot_id"      binding:"required"`
 }
 
 type UpdateGateRequest struct {
@@ -16,21 +16,21 @@ type UpdateGateRequest struct {
 // ─── URI params ──────────────────────────────────────────────────────────────
 
 type GateURIParams struct {
-	GateID uint `uri:"gateId" binding:"required"`
+	GateID uint64 `uri:"gateId" binding:"required"`
 }
 
 type LotURIParams struct {
-	LotID uint `uri:"lotId" binding:"required"`
+	LotID uint64 `uri:"lotId" binding:"required"`
 }
 
 // ─── Response ─────────────────────────────────────────────────────────────────
 
 type GateResponse struct {
-	ID         uint     `json:"id"`
+	ID         uint64   `json:"id"`
 	Name       string   `json:"name"`
 	Type       GateType `json:"type"`
 	MacAddress string   `json:"mac_address"`
-	LotID      uint     `json:"lot_id"`
+	LotID      uint64   `json:"lot_id"`
 	IsActive   bool     `json:"is_active"`
 }
 

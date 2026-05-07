@@ -16,19 +16,19 @@ type plateCacheEntry struct {
 // Mỗi entry tồn tại tối đa 5 phút, dùng 1 lần rồi xóa (consume).
 type PlateCache struct {
 	mu    sync.Mutex
-	cache map[uint]plateCacheEntry
+	cache map[uint64]plateCacheEntry
 }
 
 func NewPlateCache() *PlateCache {
 	pc := &PlateCache{
-		cache: make(map[uint]plateCacheEntry),
+		cache: make(map[uint64]plateCacheEntry),
 	}
 	go pc.cleanupLoop()
 	return pc
 }
 
 // Set lưu biển số cho gateID, ghi đè nếu đã tồn tại
-func (pc *PlateCache) Set(gateID uint, plateNumber string) {
+func (pc *PlateCache) Set(gateID uint64, plateNumber string) {
 	pc.mu.Lock()
 	defer pc.mu.Unlock()
 	pc.cache[gateID] = plateCacheEntry{
@@ -39,7 +39,7 @@ func (pc *PlateCache) Set(gateID uint, plateNumber string) {
 
 // Consume lấy biển số và xóa khỏi cache (dùng 1 lần).
 // Trả về ("", false) nếu không tìm thấy hoặc đã hết TTL.
-func (pc *PlateCache) Consume(gateID uint) (string, bool) {
+func (pc *PlateCache) Consume(gateID uint64) (string, bool) {
 	pc.mu.Lock()
 	defer pc.mu.Unlock()
 
@@ -58,7 +58,7 @@ func (pc *PlateCache) Consume(gateID uint) (string, bool) {
 }
 
 // Peek reads the plate without deleting (for validation before consume)
-func (pc *PlateCache) Peek(gateID uint) (string, bool) {
+func (pc *PlateCache) Peek(gateID uint64) (string, bool) {
 	pc.mu.Lock()
 	defer pc.mu.Unlock()
 

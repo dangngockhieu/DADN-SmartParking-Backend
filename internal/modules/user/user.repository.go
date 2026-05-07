@@ -28,7 +28,7 @@ func (r *Repository) FindByEmail(email string) (*User, error) {
 }
 
 // FindByID tìm người dùng theo ID
-func (r *Repository) FindByID(id uint) (*User, error) {
+func (r *Repository) FindByID(id uint64) (*User, error) {
 	var user User
 	err := r.db.First(&user, id).Error
 	if err != nil {
@@ -46,12 +46,12 @@ func (r *Repository) Create(user *User) error {
 }
 
 // UpdatePassword cập nhật mật khẩu đã được hash cho người dùng
-func (r *Repository) UpdatePassword(id uint, hashedPassword string) error {
+func (r *Repository) UpdatePassword(id uint64, hashedPassword string) error {
 	return r.db.Model(&User{}).Where("id = ?", id).Update("password", hashedPassword).Error
 }
 
 // UpdateRole cập nhật vai trò cho người dùng
-func (r *Repository) UpdateRole(id uint, role Role) error {
+func (r *Repository) UpdateRole(id uint64, role Role) error {
 	return r.db.Model(&User{}).Where("id = ?", id).Update("role", role).Error
 }
 
@@ -89,7 +89,7 @@ func (r *Repository) FindWithPagination(page, pageSize int, search string) ([]Us
 }
 
 // UpdateProfile cập nhật thông tin cá nhân cho người dùng
-func (r *Repository) UpdateProfile(id uint, first_name, last_name *string) (*User, error) {
+func (r *Repository) UpdateProfile(id uint64, first_name, last_name *string) (*User, error) {
 	updateData := make(map[string]interface{})
 
 	if first_name != nil {
@@ -108,7 +108,7 @@ func (r *Repository) UpdateProfile(id uint, first_name, last_name *string) (*Use
 }
 
 // Lấy số tiền hiện tại trong ví của người dùng
-func (r *Repository) GetWalletBalance(userID uint) (int64, error) {
+func (r *Repository) GetWalletBalance(userID uint64) (int64, error) {
 	var user User
 	err := r.db.Select("money").First(&user, userID).Error
 	if err != nil {
@@ -118,11 +118,11 @@ func (r *Repository) GetWalletBalance(userID uint) (int64, error) {
 }
 
 // DepositToWallet nạp tiền vào ví của người dùng
-func (r *Repository) DepositToWallet(userID uint, amount int64) error {
+func (r *Repository) DepositToWallet(userID uint64, amount int64) error {
 	return r.db.Model(&User{}).Where("id = ?", userID).UpdateColumn("money", gorm.Expr("money + ?", amount)).Error
 }
 
 // WithdrawFromWallet rút tiền từ ví của người dùng
-func (r *Repository) WithdrawFromWallet(userID uint, amount int64) error {
+func (r *Repository) WithdrawFromWallet(userID uint64, amount int64) error {
 	return r.db.Model(&User{}).Where("id = ?", userID).UpdateColumn("money", gorm.Expr("money - ?", amount)).Error
 }

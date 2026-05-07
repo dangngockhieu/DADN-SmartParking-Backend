@@ -2,7 +2,7 @@ package iot_gateway
 
 // CameraPlateRequest là payload camera AI gửi lên
 type CameraPlateRequest struct {
-	GateID      uint   `json:"gate_id" binding:"required"`
+	GateID      uint64 `json:"gate_id" binding:"required"`
 	PlateNumber string `json:"plate_number" binding:"required"`
 }
 
@@ -14,7 +14,7 @@ type CameraPlateResponse struct {
 
 // RfidScanRequest là payload ESP32 + RC522 gửi lên
 type RfidScanRequest struct {
-	GateID     uint   `json:"gate_id"     binding:"required"`
+	GateID     uint64 `json:"gate_id"     binding:"required"`
 	MacAddress string `json:"mac_address" binding:"required"`
 	RfidUID    string `json:"rfid_uid"    binding:"required"`
 }

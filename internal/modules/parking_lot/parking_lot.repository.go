@@ -34,7 +34,7 @@ func (r *Repository) FindAll() ([]ParkingLot, error) {
 }
 
 // Lấy thông tin chi tiết bãi đỗ theo ID
-func (r *Repository) FindByID(id uint) (*ParkingLot, error) {
+func (r *Repository) FindByID(id uint64) (*ParkingLot, error) {
 	var lot ParkingLot
 	err := r.db.
 		Select("id", "name", "location").
@@ -46,12 +46,12 @@ func (r *Repository) FindByID(id uint) (*ParkingLot, error) {
 }
 
 // Cập nhật thông tin bãi đỗ theo ID
-func (r *Repository) UpdateByID(id uint, data map[string]interface{}) error {
+func (r *Repository) UpdateByID(id uint64, data map[string]interface{}) error {
 	return r.db.Model(&ParkingLot{}).Where("id = ?", id).Updates(data).Error
 }
 
 // Xóa bãi đỗ theo ID
-func (r *Repository) FindSlotsByLotID(lotID uint) ([]ParkingLotSlotResponse, error) {
+func (r *Repository) FindSlotsByLotID(lotID uint64) ([]ParkingLotSlotResponse, error) {
 	var slots []ParkingLotSlotResponse
 
 	err := r.db.
@@ -69,7 +69,7 @@ func (r *Repository) FindSlotsByLotID(lotID uint) ([]ParkingLotSlotResponse, err
 }
 
 // Lấy danh sách cổng của bãi đỗ theo ID
-func (r *Repository) FindGatesByLotID(lotID uint) ([]ParkingLotGateResponse, error) {
+func (r *Repository) FindGatesByLotID(lotID uint64) ([]ParkingLotGateResponse, error) {
 	var gates []ParkingLotGateResponse
 
 	err := r.db.
@@ -86,7 +86,7 @@ func (r *Repository) FindGatesByLotID(lotID uint) ([]ParkingLotGateResponse, err
 }
 
 // Lấy thông tin chi tiết bãi đỗ theo ID, bao gồm danh sách slot và thống kê
-func (r *Repository) CountStatsByLotID(lotID uint) ([]parkingLotStatsRow, error) {
+func (r *Repository) CountStatsByLotID(lotID uint64) ([]parkingLotStatsRow, error) {
 	var rows []parkingLotStatsRow
 
 	err := r.db.
@@ -104,8 +104,8 @@ func (r *Repository) CountStatsByLotID(lotID uint) ([]parkingLotStatsRow, error)
 }
 
 // Lấy user ID theo email
-func (r *Repository) GetUserIDByEmail(email string) (*uint, error) {
-	var userID uint
+func (r *Repository) GetUserIDByEmail(email string) (*uint64, error) {
+	var userID uint64
 	err := r.db.Where("email = ?", email).Select("id").Scan(&userID).Error
 	if err != nil {
 		return nil, err

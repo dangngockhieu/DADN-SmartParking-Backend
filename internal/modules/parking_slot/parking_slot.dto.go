@@ -12,7 +12,7 @@ type SensorUpdateParkingSlotRequest struct {
 
 type CreateParkingSlotRequest struct {
 	Name       string `json:"name" binding:"required"`
-	LotID      uint   `json:"lot_id" binding:"required"`
+	LotID      uint64 `json:"lot_id" binding:"required"`
 	DeviceMac  string `json:"device_mac" binding:"required"`
 	PortNumber int    `json:"port_number" binding:"required"`
 }
@@ -24,8 +24,8 @@ type ChangeSlotDeviceRequest struct {
 
 type UpdateParkingSlotResponse struct {
 	Changed   bool       `json:"changed"`
-	ID        uint       `json:"id"`
-	LotID     uint       `json:"lot_id"`
+	ID        uint64     `json:"id"`
+	LotID     uint64     `json:"lot_id"`
 	Name      string     `json:"name"`
 	Message   string     `json:"message"`
 	OldStatus SlotStatus `json:"old_status"`

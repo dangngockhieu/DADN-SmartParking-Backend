@@ -20,7 +20,7 @@ func (r *Repository) Create(session *ParkingSession) error {
 }
 
 // Lấy phiên gửi xe theo ID
-func (r *Repository) FindByID(id uint) (*ParkingSession, error) {
+func (r *Repository) FindByID(id uint64) (*ParkingSession, error) {
 	var session ParkingSession
 	err := r.db.First(&session, id).Error
 	if err != nil {
@@ -135,14 +135,14 @@ func (r *Repository) FindActiveByPlateNumber(plateNumber string) (*ParkingSessio
 }
 
 // Cập nhật phiên gửi xe theo ID
-func (r *Repository) UpdateByID(id uint, data map[string]any) error {
+func (r *Repository) UpdateByID(id uint64, data map[string]any) error {
 	return r.db.Model(&ParkingSession{}).Where("id = ?", id).Updates(data).Error
 }
 
 // Lấy danh sách phiên gửi xe theo ngày và userID
 func (r *Repository) FindByDate(
 	date time.Time,
-	userID uint,
+	userID uint64,
 	page int,
 	pageSize int,
 ) ([]ParkingSession, int64, error) {

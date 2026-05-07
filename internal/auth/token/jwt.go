@@ -16,7 +16,7 @@ type Service struct {
 
 // AccessToken chứa các thông tin về userID, email, role
 type AccessClaims struct {
-	UserID uint   `json:"user_id"`
+	UserID uint64 `json:"user_id"`
 	Email  string `json:"email"`
 	Role   string `json:"role"`
 	jwt.RegisteredClaims
@@ -24,7 +24,7 @@ type AccessClaims struct {
 
 // RefreshToken chỉ chứa userID và email
 type RefreshClaims struct {
-	UserID uint   `json:"user_id"`
+	UserID uint64 `json:"user_id"`
 	Email  string `json:"email"`
 	jwt.RegisteredClaims
 }
@@ -34,7 +34,7 @@ func NewService(cfg *configs.Config) *Service {
 }
 
 // Tạo Access Token với thời hạn 15 phút
-func (s *Service) CreateAccessToken(userID uint, email, role string) (string, error) {
+func (s *Service) CreateAccessToken(userID uint64, email, role string) (string, error) {
 	now := time.Now()
 
 	claims := AccessClaims{
@@ -54,7 +54,7 @@ func (s *Service) CreateAccessToken(userID uint, email, role string) (string, er
 }
 
 // Tạo Refresh Token với thời hạn 7 ngày
-func (s *Service) CreateRefreshToken(userID uint, email string) (string, error) {
+func (s *Service) CreateRefreshToken(userID uint64, email string) (string, error) {
 	now := time.Now()
 
 	claims := RefreshClaims{

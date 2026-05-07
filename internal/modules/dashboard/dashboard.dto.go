@@ -1,8 +1,8 @@
 package dashboard
 
 type ParkingFlowQuery struct {
-	LotID *uint  `form:"lotId"`
-	Date  string `form:"date"`
+	LotID *uint64 `form:"lotId"`
+	Date  string  `form:"date"`
 }
 
 type DashboardSummaryResponse struct {
@@ -33,7 +33,7 @@ type DashboardInsightsResponse struct {
 
 type ParkingFlowResponse struct {
 	Date       string                    `json:"date"`
-	LotID      *uint                     `json:"lotId"`
+	LotID      *uint64                   `json:"lotId"`
 	LotName    string                    `json:"lotName"`
 	Summary    DashboardSummaryResponse  `json:"summary"`
 	HourlyFlow []HourlyFlowResponse      `json:"hourlyFlow"`

@@ -48,7 +48,7 @@ func (s *Service) FindWithPagination(page, pageSize int, search string) (*UserPa
 }
 
 // Get My Info
-func (s *Service) GetMyInfo(id uint) (*MyAccountResponse, error) {
+func (s *Service) GetMyInfo(id uint64) (*MyAccountResponse, error) {
 	user, err := s.repo.FindByID(id)
 	if err != nil {
 		return nil, appErrors.NewInternal("Lấy thông tin người dùng thất bại")
@@ -102,7 +102,7 @@ func (s *Service) CreateUserByAdmin(req CreateUserRequest) error {
 }
 
 // ChangePassword đổi mật khẩu cho người dùng
-func (s *Service) ChangePassword(userID uint, req ChangePasswordRequest) error {
+func (s *Service) ChangePassword(userID uint64, req ChangePasswordRequest) error {
 	if req.NewPassword != req.ConfirmPassword {
 		return appErrors.NewBadRequest("Mật khẩu mới và xác nhận mật khẩu không khớp!")
 	}
@@ -132,7 +132,7 @@ func (s *Service) ChangePassword(userID uint, req ChangePasswordRequest) error {
 }
 
 // ChangeRole đổi vai trò cho người dùng
-func (s *Service) ChangeRole(userID uint, req ChangeRoleRequest) error {
+func (s *Service) ChangeRole(userID uint64, req ChangeRoleRequest) error {
 	user, err := s.repo.FindByID(userID)
 	if err != nil {
 		return appErrors.NewInternal("Lấy thông tin người dùng thất bại")
@@ -149,7 +149,7 @@ func (s *Service) ChangeRole(userID uint, req ChangeRoleRequest) error {
 }
 
 // ChangeProfile cập nhật thông tin cá nhân cho người dùng
-func (s *Service) ChangeProfile(userID uint, req ChangeProfileRequest) (*UserResponse, error) {
+func (s *Service) ChangeProfile(userID uint64, req ChangeProfileRequest) (*UserResponse, error) {
 	// Hứng cả updatedUser và err
 	updatedUser, err := s.repo.UpdateProfile(userID, req.FirstName, req.LastName)
 
@@ -168,7 +168,7 @@ func (s *Service) ChangeProfile(userID uint, req ChangeProfileRequest) (*UserRes
 }
 
 // GetWalletBalance lấy số tiền hiện tại trong ví của người dùng
-func (s *Service) GetWalletBalance(userID uint) (int64, error) {
+func (s *Service) GetWalletBalance(userID uint64) (int64, error) {
 	balance, err := s.repo.GetWalletBalance(userID)
 	if err != nil {
 		return 0, appErrors.NewInternal("Lấy số tiền trong ví thất bại")
@@ -177,7 +177,7 @@ func (s *Service) GetWalletBalance(userID uint) (int64, error) {
 }
 
 // Cộng tiền vào ví của người dùng
-func (s *Service) DepositToWallet(userID uint, amount int64) error {
+func (s *Service) DepositToWallet(userID uint64, amount int64) error {
 	if amount <= 0 {
 		return appErrors.NewBadRequest("Số tiền phải lớn hơn 0")
 	}
@@ -188,7 +188,7 @@ func (s *Service) DepositToWallet(userID uint, amount int64) error {
 }
 
 // Trừ tiền từ ví của người dùng
-func (s *Service) WithdrawFromWallet(userID uint, amount int64) error {
+func (s *Service) WithdrawFromWallet(userID uint64, amount int64) error {
 	if amount <= 0 {
 		return appErrors.NewBadRequest("Số tiền phải lớn hơn 0")
 	}

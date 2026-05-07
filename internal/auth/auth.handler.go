@@ -174,7 +174,7 @@ func (h *Handler) Logout(c *gin.Context) {
 		return
 	}
 
-	userID, ok := userIDValue.(uint)
+	userID, ok := userIDValue.(uint64)
 	if !ok {
 		c.Error(appErrors.NewUnauthorized("Unauthorized"))
 		return

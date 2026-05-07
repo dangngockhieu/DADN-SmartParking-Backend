@@ -24,7 +24,7 @@ type ChangeRoleRequest struct {
 }
 
 type UserResponse struct {
-	ID        uint   `json:"id"`
+	ID        uint64 `json:"id"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Email     string `json:"email"`
@@ -32,7 +32,7 @@ type UserResponse struct {
 }
 
 type MyAccountResponse struct {
-	ID        uint   `json:"id"`
+	ID        uint64 `json:"id"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Email     string `json:"email"`

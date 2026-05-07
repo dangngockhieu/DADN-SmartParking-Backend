@@ -70,7 +70,7 @@ func (s *Service) Create(req CreateParkingSlotRequest) (*ParkingSlot, error) {
 	return slot, nil
 }
 
-func (s *Service) FindByID(id uint) (*ParkingSlot, error) {
+func (s *Service) FindByID(id uint64) (*ParkingSlot, error) {
 	slot, err := s.repo.FindByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -81,7 +81,7 @@ func (s *Service) FindByID(id uint) (*ParkingSlot, error) {
 	return slot, nil
 }
 
-func (s *Service) AdminUpdateStatus(id uint, req AdminUpdateParkingSlotRequest) (*UpdateParkingSlotResponse, error) {
+func (s *Service) AdminUpdateStatus(id uint64, req AdminUpdateParkingSlotRequest) (*UpdateParkingSlotResponse, error) {
 	slot, err := s.repo.FindByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -121,7 +121,7 @@ func (s *Service) SensorUpdateStatus(req SensorUpdateParkingSlotRequest) (*Updat
 	return s.updateStatus(slot, newStatus)
 }
 
-func (s *Service) ChangeDevice(id uint, req ChangeSlotDeviceRequest) (*ParkingSlot, error) {
+func (s *Service) ChangeDevice(id uint64, req ChangeSlotDeviceRequest) (*ParkingSlot, error) {
 	_, err := s.repo.FindByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -146,7 +146,7 @@ func (s *Service) ChangeDevice(id uint, req ChangeSlotDeviceRequest) (*ParkingSl
 	return updated, nil
 }
 
-func (s *Service) IsAvailable(lotID uint) (bool, error) {
+func (s *Service) IsAvailable(lotID uint64) (bool, error) {
 	exists, err := s.repo.IsAvailable(lotID)
 	if err != nil {
 		return false, appErrors.NewInternal("Kiểm tra vị trí đỗ thất bại")

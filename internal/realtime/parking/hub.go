@@ -12,7 +12,7 @@ type Session interface {
 }
 
 type Client struct {
-	LotID   uint
+	LotID   uint64
 	Session Session
 }
 
@@ -46,7 +46,7 @@ func (h *Hub) Remove(s Session) {
 	delete(h.clients, s)
 }
 
-func (h *Hub) BroadcastToLot(lotID uint, event string, data any) {
+func (h *Hub) BroadcastToLot(lotID uint64, event string, data any) {
 	h.broadcast(event, data, func(client *Client) bool {
 		return client.LotID == lotID
 	})

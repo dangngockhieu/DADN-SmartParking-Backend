@@ -11,13 +11,13 @@ type UpdateParkingLotRequest struct {
 }
 
 type ParkingLotResponse struct {
-	ID       uint    `json:"id"`
+	ID       uint64  `json:"id"`
 	Name     string  `json:"name"`
 	Location *string `json:"location,omitempty"`
 }
 
 type ParkingLotSlotResponse struct {
-	ID         uint   `json:"id"`
+	ID         uint64 `json:"id"`
 	Name       string `json:"name"`
 	Status     string `json:"status"`
 	DeviceMac  string `json:"device_mac"`
@@ -25,7 +25,7 @@ type ParkingLotSlotResponse struct {
 }
 
 type ParkingLotGateResponse struct {
-	ID         uint   `json:"id"`
+	ID         uint64 `json:"id"`
 	Name       string `json:"name"`
 	Type       string `json:"type"`
 	MacAddress string `json:"mac_address"`
@@ -40,7 +40,7 @@ type ParkingLotStatsResponse struct {
 }
 
 type ParkingLotDetailResponse struct {
-	ID       uint                     `json:"id"`
+	ID       uint64                   `json:"id"`
 	Name     string                   `json:"name"`
 	Location *string                  `json:"location,omitempty"`
 	Slots    []ParkingLotSlotResponse `json:"slots"`

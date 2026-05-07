@@ -16,7 +16,7 @@ func (r *Repository) Create(gate *Gate) error {
 }
 
 // FindByID tìm cổng theo ID
-func (r *Repository) FindByID(id uint) (*Gate, error) {
+func (r *Repository) FindByID(id uint64) (*Gate, error) {
 	var gate Gate
 	err := r.db.First(&gate, id).Error
 	if err != nil {

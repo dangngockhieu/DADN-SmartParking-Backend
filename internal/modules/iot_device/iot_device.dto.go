@@ -6,13 +6,13 @@ import (
 )
 
 type CreateIoTDeviceRequest struct {
-	MacAddress string `json:"mac_address" binding:"required"`
-	DeviceName string `json:"device_name" binding:"required"`
-	LotID      *uint  `json:"lot_id"`
+	MacAddress string  `json:"mac_address" binding:"required"`
+	DeviceName string  `json:"device_name" binding:"required"`
+	LotID      *uint64 `json:"lot_id"`
 }
 
 type GetIoTDevicesQuery struct {
-	LotID   *uint         `form:"lot_id"`
+	LotID   *uint64       `form:"lot_id"`
 	Status  *DeviceStatus `form:"status" binding:"omitempty,oneof=ACTIVE INACTIVE ERROR"`
 	Keyword string        `form:"keyword"`
 }
@@ -20,7 +20,7 @@ type GetIoTDevicesQuery struct {
 type UpdateIoTDeviceRequest struct {
 	DeviceName *string       `json:"device_name" binding:"omitempty"`
 	Status     *DeviceStatus `json:"status" binding:"omitempty,oneof=ACTIVE INACTIVE ERROR"`
-	LotID      *uint         `json:"lot_id"`
+	LotID      *uint64       `json:"lot_id"`
 	HasLotID   bool          `json:"-"`
 }
 
@@ -28,7 +28,7 @@ type IoTDeviceResponse struct {
 	MacAddress string       `json:"mac_address"`
 	DeviceName string       `json:"device_name"`
 	Status     DeviceStatus `json:"status"`
-	LotID      *uint        `json:"lot_id"`
+	LotID      *uint64      `json:"lot_id"`
 	LotName    *string      `json:"lot_name"`
 	LastSeen   *time.Time   `json:"last_seen"`
 	CreatedAt  time.Time    `json:"created_at"`
@@ -65,7 +65,7 @@ func (r *UpdateIoTDeviceRequest) UnmarshalJSON(data []byte) error {
 	type alias struct {
 		DeviceName *string       `json:"device_name"`
 		Status     *DeviceStatus `json:"status"`
-		LotID      *uint         `json:"lot_id"`
+		LotID      *uint64       `json:"lot_id"`
 	}
 
 	var decoded alias

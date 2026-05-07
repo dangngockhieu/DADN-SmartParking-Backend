@@ -40,14 +40,14 @@ func (r *Repository) CreateUser(u *user.User) error {
 }
 
 // UpdateUserVerified cập nhật trạng thái verified của user
-func (r *Repository) UpdateUserVerified(userID uint, verified bool) error {
+func (r *Repository) UpdateUserVerified(userID uint64, verified bool) error {
 	return r.db.Model(&user.User{}).
 		Where("id = ?", userID).
 		Update("is_verified", verified).Error
 }
 
 // UpdateUserPassword cập nhật mật khẩu đã hash của user
-func (r *Repository) UpdateUserPassword(userID uint, hashedPassword string) error {
+func (r *Repository) UpdateUserPassword(userID uint64, hashedPassword string) error {
 	return r.db.Model(&user.User{}).
 		Where("id = ?", userID).
 		Update("password", hashedPassword).Error
@@ -59,7 +59,7 @@ func (r *Repository) CreateRefreshToken(rt *token.RefreshToken) error {
 }
 
 // FindRefreshTokensByUserID lấy tất cả refresh token của user, sắp xếp theo thời gian tạo tăng dần
-func (r *Repository) FindRefreshTokensByUserID(userID uint) ([]token.RefreshToken, error) {
+func (r *Repository) FindRefreshTokensByUserID(userID uint64) ([]token.RefreshToken, error) {
 	var tokens []token.RefreshToken
 	err := r.db.
 		Where("user_id = ?", userID).
@@ -69,6 +69,6 @@ func (r *Repository) FindRefreshTokensByUserID(userID uint) ([]token.RefreshToke
 }
 
 // DeleteRefreshTokenByID xóa refresh
-func (r *Repository) DeleteRefreshTokenByID(id uint) error {
+func (r *Repository) DeleteRefreshTokenByID(id uint64) error {
 	return r.db.Delete(&token.RefreshToken{}, id).Error
 }

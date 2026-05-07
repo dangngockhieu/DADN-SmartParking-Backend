@@ -1,7 +1,7 @@
 package token
 
 type ClaimsPayload struct {
-	UserID uint
+	UserID uint64
 	Email  string
 	Role   string
 	JTI    string

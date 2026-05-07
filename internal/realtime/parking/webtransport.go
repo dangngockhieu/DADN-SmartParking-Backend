@@ -106,7 +106,7 @@ func (s *Server) handleUpgrade(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lotID := uint(lotID64)
+	lotID := uint64(lotID64)
 
 	sess, err := s.server.Upgrade(w, r)
 	if err != nil {

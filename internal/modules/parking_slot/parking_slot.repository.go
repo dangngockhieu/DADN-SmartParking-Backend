@@ -12,7 +12,7 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{db: db}
 }
 
-func (r *Repository) FindByID(id uint) (*ParkingSlot, error) {
+func (r *Repository) FindByID(id uint64) (*ParkingSlot, error) {
 	var slot ParkingSlot
 	err := r.db.First(&slot, id).Error
 	if err != nil {
@@ -36,11 +36,11 @@ func (r *Repository) Create(slot *ParkingSlot) error {
 	return r.db.Create(slot).Error
 }
 
-func (r *Repository) UpdateStatus(id uint, status SlotStatus) error {
+func (r *Repository) UpdateStatus(id uint64, status SlotStatus) error {
 	return r.db.Model(&ParkingSlot{}).Where("id = ?", id).Update("status", status).Error
 }
 
-func (r *Repository) FindConflictSlot(deviceMac string, portNumber int, excludeID uint) (*ParkingSlot, error) {
+func (r *Repository) FindConflictSlot(deviceMac string, portNumber int, excludeID uint64) (*ParkingSlot, error) {
 	var slot ParkingSlot
 	err := r.db.
 		Where("device_mac = ? AND port_number = ? AND id <> ?", deviceMac, portNumber, excludeID).
@@ -52,7 +52,7 @@ func (r *Repository) FindConflictSlot(deviceMac string, portNumber int, excludeI
 }
 
 func (r *Repository) ChangeDevice(
-	slotID uint,
+	slotID uint64,
 	deviceMac string,
 	portNumber int,
 ) (*ParkingSlot, error) {
@@ -87,7 +87,7 @@ func (r *Repository) ChangeDevice(
 	return &updated, nil
 }
 
-func (r *Repository) IsAvailable(lotID uint) (bool, error) {
+func (r *Repository) IsAvailable(lotID uint64) (bool, error) {
 	var count int64
 	err := r.db.Model(&ParkingSlot{}).
 		Where("lot_id = ? AND status = ?", lotID, "AVAILABLE").

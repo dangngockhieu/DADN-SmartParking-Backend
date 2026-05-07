@@ -8,11 +8,11 @@ const (
 )
 
 type Gate struct {
-	ID         uint     `gorm:"primaryKey;autoIncrement"`
+	ID         uint64   `gorm:"primaryKey;autoIncrement"`
 	Name       string   `gorm:"type:varchar(50);not null"`
 	Type       GateType `gorm:"type:enum('ENTRY','EXIT');not null"`
 	MacAddress string   `gorm:"type:varchar(50);not null;uniqueIndex"`
-	LotID      uint     `gorm:"not null;index"`
+	LotID      uint64   `gorm:"not null;index"`
 	IsActive   bool     `gorm:"not null;default:true"`
 }
 

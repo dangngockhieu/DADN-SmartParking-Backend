@@ -11,9 +11,9 @@ const (
 )
 
 type ParkingSlot struct {
-	ID         uint       `gorm:"primaryKey;autoIncrement"`
+	ID         uint64     `gorm:"primaryKey;autoIncrement"`
 	Name       string     `gorm:"type:varchar(10);not null;uniqueIndex:uk_lot_name"`
-	LotID      uint       `gorm:"not null;index;uniqueIndex:uk_lot_name;index:idx_lot_status"`
+	LotID      uint64     `gorm:"not null;index;uniqueIndex:uk_lot_name;index:idx_lot_status"`
 	DeviceMac  string     `gorm:"type:varchar(50);not null;index;uniqueIndex:uk_device_port"`
 	PortNumber int        `gorm:"not null;uniqueIndex:uk_device_port"`
 	Status     SlotStatus `gorm:"type:enum('AVAILABLE','OCCUPIED','MAINTAIN');default:'AVAILABLE';not null;index:idx_lot_status"`

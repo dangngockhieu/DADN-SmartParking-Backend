@@ -21,7 +21,7 @@ type HourlyCountRow struct {
 }
 
 // Đếm số xe vào trong ngày
-func (r *Repository) CountTodayIn(start time.Time, end time.Time, lotID *uint) (int64, error) {
+func (r *Repository) CountTodayIn(start time.Time, end time.Time, lotID *uint64) (int64, error) {
 	var total int64
 
 	db := r.db.Table("parking_sessions").
@@ -39,7 +39,7 @@ func (r *Repository) CountTodayIn(start time.Time, end time.Time, lotID *uint) (
 }
 
 // Đếm số xe ra trong ngày
-func (r *Repository) CountTodayOut(start time.Time, end time.Time, lotID *uint) (int64, error) {
+func (r *Repository) CountTodayOut(start time.Time, end time.Time, lotID *uint64) (int64, error) {
 	var total int64
 
 	db := r.db.Table("parking_sessions").
@@ -58,7 +58,7 @@ func (r *Repository) CountTodayOut(start time.Time, end time.Time, lotID *uint) 
 }
 
 // Đếm số xe hiện tại đang đỗ
-func (r *Repository) CountCurrentVehicles(lotID *uint) (int64, error) {
+func (r *Repository) CountCurrentVehicles(lotID *uint64) (int64, error) {
 	var total int64
 
 	db := r.db.Table("parking_slots").
@@ -76,7 +76,7 @@ func (r *Repository) CountCurrentVehicles(lotID *uint) (int64, error) {
 }
 
 // Đếm tổng số chỗ trong bãi xe
-func (r *Repository) CountCapacity(lotID *uint) (int64, error) {
+func (r *Repository) CountCapacity(lotID *uint64) (int64, error) {
 	var total int64
 
 	db := r.db.Table("parking_slots")
@@ -93,7 +93,7 @@ func (r *Repository) CountCapacity(lotID *uint) (int64, error) {
 }
 
 // Đếm số chỗ trống trong bãi xe
-func (r *Repository) CountAvailableSlots(lotID *uint) (int64, error) {
+func (r *Repository) CountAvailableSlots(lotID *uint64) (int64, error) {
 	var total int64
 
 	db := r.db.Table("parking_slots").
@@ -111,7 +111,7 @@ func (r *Repository) CountAvailableSlots(lotID *uint) (int64, error) {
 }
 
 // Lấy số xe vào theo giờ trong ngày
-func (r *Repository) GetHourlyIn(start time.Time, end time.Time, lotID *uint) ([]HourlyCountRow, error) {
+func (r *Repository) GetHourlyIn(start time.Time, end time.Time, lotID *uint64) ([]HourlyCountRow, error) {
 	var rows []HourlyCountRow
 
 	db := r.db.Table("parking_sessions").
@@ -133,7 +133,7 @@ func (r *Repository) GetHourlyIn(start time.Time, end time.Time, lotID *uint) ([
 }
 
 // Lấy số xe ra theo giờ trong ngày
-func (r *Repository) GetHourlyOut(start time.Time, end time.Time, lotID *uint) ([]HourlyCountRow, error) {
+func (r *Repository) GetHourlyOut(start time.Time, end time.Time, lotID *uint64) ([]HourlyCountRow, error) {
 	var rows []HourlyCountRow
 
 	db := r.db.Table("parking_sessions").
@@ -156,7 +156,7 @@ func (r *Repository) GetHourlyOut(start time.Time, end time.Time, lotID *uint) (
 }
 
 // Lấy tên bãi xe
-func (r *Repository) GetLotName(lotID uint) (string, error) {
+func (r *Repository) GetLotName(lotID uint64) (string, error) {
 	var name string
 
 	err := r.db.Table("parking_lots").

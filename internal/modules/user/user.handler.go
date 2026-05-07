@@ -60,7 +60,7 @@ func (h *Handler) GetMyInfo(c *gin.Context) {
 		c.Error(appErrors.NewUnauthorized("Unauthorized"))
 		return
 	}
-	userID, ok := userIDValue.(uint)
+	userID, ok := userIDValue.(uint64)
 	if !ok {
 		c.Error(appErrors.NewUnauthorized("Unauthorized"))
 		return
@@ -129,7 +129,7 @@ func (h *Handler) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	userID, ok := userIDValue.(uint)
+	userID, ok := userIDValue.(uint64)
 	if !ok {
 		c.Error(appErrors.NewUnauthorized("Unauthorized"))
 		return
@@ -170,7 +170,7 @@ func (h *Handler) ChangeRole(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.ChangeRole(uint(id64), req); err != nil {
+	if err := h.service.ChangeRole(uint64(id64), req); err != nil {
 		c.Error(err)
 		return
 	}
@@ -198,7 +198,7 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 		c.Error(appErrors.NewUnauthorized("Unauthorized"))
 		return
 	}
-	userID, ok := userIDValue.(uint)
+	userID, ok := userIDValue.(uint64)
 	if !ok {
 		c.Error(appErrors.NewUnauthorized("Unauthorized"))
 		return

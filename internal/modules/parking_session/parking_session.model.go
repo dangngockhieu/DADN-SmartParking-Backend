@@ -7,9 +7,9 @@ import (
 )
 
 type ParkingSession struct {
-	ID          uint               `gorm:"primaryKey;autoIncrement" json:"id"`
-	LotID       uint               `gorm:"not null;index" json:"lot_id"`
-	SlotID      *uint              `gorm:"index" json:"slot_id,omitempty"`
+	ID          uint64             `gorm:"primaryKey;autoIncrement" json:"id"`
+	LotID       uint64             `gorm:"not null;index" json:"lot_id"`
+	SlotID      *uint64            `gorm:"index" json:"slot_id,omitempty"`
 	CardUID     string             `gorm:"type:varchar(20);not null;index" json:"card_uid"`
 	CardType    rfid_card.CardType `gorm:"type:enum('REGISTERED','GUEST');not null" json:"card_type"`
 	PlateNumber string             `gorm:"type:varchar(20);not null;index" json:"plate_number"`

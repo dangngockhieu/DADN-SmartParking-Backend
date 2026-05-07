@@ -78,10 +78,10 @@ func (h *Handler) Update(c *gin.Context) {
 
 // ─── helper ──────────────────────────────────────────────────────────────────
 
-func parseUintParam(c *gin.Context, key string) (uint, error) {
+func parseUintParam(c *gin.Context, key string) (uint64, error) {
 	v, err := strconv.ParseUint(c.Param(key), 10, 64)
 	if err != nil {
 		return 0, err
 	}
-	return uint(v), nil
+	return uint64(v), nil
 }
