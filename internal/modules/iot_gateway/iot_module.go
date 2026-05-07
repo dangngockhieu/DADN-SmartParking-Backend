@@ -5,6 +5,7 @@ import (
 	"backend/internal/modules/parking_session"
 	"backend/internal/modules/parking_slot"
 	"backend/internal/modules/rfid_card"
+	"backend/internal/modules/user"
 )
 
 type Module struct {
@@ -18,9 +19,10 @@ func NewModule(
 	rfidService *rfid_card.Service,
 	sessionService *parking_session.Service,
 	parkingSlotService *parking_slot.Service,
+	userService *user.Service,
 ) *Module {
 	plateCache := NewPlateCache()
-	service := NewService(plateCache, gateService, rfidService, sessionService, parkingSlotService)
+	service := NewService(plateCache, gateService, rfidService, sessionService, parkingSlotService, userService)
 	handler := NewHandler(service)
 
 	return &Module{

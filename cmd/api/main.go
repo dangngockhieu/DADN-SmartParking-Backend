@@ -19,7 +19,8 @@ import (
 	"backend/internal/modules/parking_slot"
 	"backend/internal/modules/rfid_card"
 	"backend/internal/modules/user"
-	"backend/internal/modules/wallet"
+
+	// "backend/internal/modules/wallet"
 	"backend/internal/realtime/parking"
 	"backend/pkg/database"
 	"backend/pkg/middleware"
@@ -83,7 +84,7 @@ func main() {
 	userModule := user.NewModule(db)
 	rfidCardModule := rfid_card.NewModule(db)
 	dashboardModule := dashboard.NewModule(db)
-	walletModule := wallet.NewModule(db, cfg)
+	// walletModule := wallet.NewModule(db, cfg)
 
 	// Quan trọng: inject parkingHub vào parking_slot module
 	parkingSlotModule := parking_slot.NewModule(db, parkingHub)
@@ -94,6 +95,7 @@ func main() {
 		rfidCardModule.Service,
 		parkingSessionModule.Service,
 		parkingSlotModule.Service,
+		userModule.Service,
 	)
 
 	// Khởi động WebTransport server
@@ -154,7 +156,7 @@ func main() {
 	rfid_card.RegisterRoutes(api, rfidCardModule.Handler, authMiddleware, adminOnly)
 	parking_session.RegisterRoutes(api, parkingSessionModule.Handler, authMiddleware, adminOnly)
 	dashboard.RegisterRoutes(api, dashboardModule.Handler, authMiddleware, adminOnly)
-	wallet.RegisterRoutes(api, walletModule.Handler, authMiddleware, adminOnly)
+	// wallet.RegisterRoutes(api, walletModule.Handler, authMiddleware, adminOnly)
 
 	log.Printf("[APP] starting Gin server on :%s", cfg.AppPort)
 

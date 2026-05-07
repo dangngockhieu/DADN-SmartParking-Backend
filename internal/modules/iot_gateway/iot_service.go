@@ -10,6 +10,7 @@ import (
 	"backend/internal/modules/parking_session"
 	"backend/internal/modules/parking_slot"
 	"backend/internal/modules/rfid_card"
+	"backend/internal/modules/user"
 )
 
 type Service struct {
@@ -18,6 +19,7 @@ type Service struct {
 	rfidService        *rfid_card.Service
 	sessionService     *parking_session.Service
 	parkingSlotService *parking_slot.Service
+	userService        *user.Service
 }
 
 func NewService(
@@ -26,6 +28,7 @@ func NewService(
 	rfidService *rfid_card.Service,
 	sessionService *parking_session.Service,
 	parkingSlotService *parking_slot.Service,
+	userService *user.Service,
 ) *Service {
 	return &Service{
 		plateCache:         plateCache,
@@ -33,6 +36,7 @@ func NewService(
 		rfidService:        rfidService,
 		sessionService:     sessionService,
 		parkingSlotService: parkingSlotService,
+		userService:        userService,
 	}
 }
 
@@ -172,11 +176,11 @@ func (s *Service) handleExit(
 		return rejectResponse("Plate mismatch"), nil
 	}
 
-	// Mọi thứ hợp lệ → consume plate khỏi cache
-	s.plateCache.Consume(g.ID)
-
 	// Tính phí
 	fee := calculateFee(session, card)
+
+	// Mọi thứ hợp lệ → consume plate khỏi cache
+	s.plateCache.Consume(g.ID)
 
 	// Kết thúc session
 	_, err = s.sessionService.FinishSession(parking_session.FinishParkingSessionInput{
@@ -187,12 +191,38 @@ func (s *Service) handleExit(
 		return nil, err
 	}
 
+	if card.UserID != nil {
+		if fee > 0 {
+			money, err := s.userService.GetWalletBalance(*card.UserID)
+			if err != nil {
+				return rejectResponse("Error Get Balance"), nil
+			}
+			if money < fee {
+				return rejectResponse("Insufficient balance"), nil
+			}
+			err = s.userService.WithdrawFromWallet(*card.UserID, fee)
+			if err != nil {
+				return rejectResponse("Error Withdraw Balance"), nil
+			}
+		}
+
+		// Nếu trừ tiền thành công hoặc fee = 0, mở barie
+		return &RfidScanResponse{
+			Success:  true,
+			Action:   "open_barrier",
+			LCDLine1: fmt.Sprintf("LP:%s", plateNumber),
+			LCDLine2: fmt.Sprintf("Fee:%dVND", fee),
+			Message:  "Session finished",
+		}, nil
+	}
+
+	// Trường hợp thẻ vãng lai (Guest, không có UserID) -> Trả tiền mặt, không tự động mở barie
 	return &RfidScanResponse{
 		Success:  true,
-		Action:   "open_barrier",
-		LCDLine1: fmt.Sprintf("LP:%s", plateNumber),
-		LCDLine2: fmt.Sprintf("Fee:%.0fVND", fee),
-		Message:  "Session finished",
+		Action:   "reject", // Không tự mở barie
+		LCDLine1: "Please pay cash",
+		LCDLine2: fmt.Sprintf("Fee:%dVND", fee),
+		Message:  "Guest must pay cash",
 	}, nil
 }
 
@@ -208,16 +238,20 @@ func rejectResponse(msg string) *RfidScanResponse {
 	}
 }
 
-// calculateFee tính phí đơn giản: 5000đ/giờ, tối thiểu 5000đ
-func calculateFee(session *parking_session.ParkingSession, card *rfid_card.RfidCard) float64 {
-	const ratePerHour = 5000.0
-	if card.CardType == rfid_card.CardTypeRegistered && card.IsActive == true {
-		return 0
-	}
+// calculateFee tính phí đơn giản: Nếu là GUEST thì 7k/h, còn Registered là 5k/h, tối thiểu 5000đ
+func calculateFee(session *parking_session.ParkingSession, card *rfid_card.RfidCard) int64 {
+	const rateGuestPerHour = 7000
+	const rateRegisteredPerHour = 5000
+	minutes := time.Since(session.EntryTime).Minutes()
 	hours := time.Since(session.EntryTime).Hours()
-	if hours < 1 {
+	if minutes != 0 {
+		hours++
+	}
+	if hours == 0 {
 		hours = 1
 	}
-	return hours * ratePerHour
-
+	if card.CardType == rfid_card.CardTypeRegistered && card.IsActive == true {
+		return int64(hours * rateRegisteredPerHour)
+	}
+	return int64(hours * rateGuestPerHour)
 }
