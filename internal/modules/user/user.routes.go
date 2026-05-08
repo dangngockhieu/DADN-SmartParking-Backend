@@ -9,6 +9,9 @@ func RegisterRoutes(api *gin.RouterGroup, handler *Handler, authMiddleware, admi
 		// Lấy danh sách người dùng với phân trang
 		group.GET("/user-pagination", adminOnly, handler.FindWithPagination)
 
+		// Lấy thông tin số dư trong ví hiện tại của người dùng
+		group.GET("/my-wallet", handler.GetMyWallet)
+
 		// Lấy thông tin người dùng hiện tại
 		group.GET("/my-info", handler.GetMyInfo)
 

@@ -211,3 +211,31 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 	}
 	response.Success(c, http.StatusOK, "Cập nhật thông tin thành công", updatedUser)
 }
+
+// GetWalletBalance godoc
+// @Summary Lấy số dư ví
+// @Description Người dùng hiện tại lấy số dư trong ví của mình
+// @Tags user
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Router /users/wallet/balance [get]
+func (h *Handler) GetMyWallet(c *gin.Context) {
+	userIDValue, exists := c.Get("user_id")
+	if !exists {
+		c.Error(appErrors.NewUnauthorized("Unauthorized"))
+		return
+	}
+	userID, ok := userIDValue.(uint64)
+	if !ok {
+		c.Error(appErrors.NewUnauthorized("Unauthorized"))
+		return
+	}
+	balance, err := h.service.GetWalletBalance(userID)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	response.Success(c, http.StatusOK, "Lấy số dư ví thành công", map[string]int64{"balance": balance})
+}
