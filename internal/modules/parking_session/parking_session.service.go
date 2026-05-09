@@ -120,8 +120,9 @@ func (s *Service) FindAll(
 	page int,
 	pageSize int,
 	search string,
+	lotId uint64,
 ) (*ManageParkingSessionListResponse, error) {
-	sessions, total, err := s.repo.FindAll(date, page, pageSize, search)
+	sessions, total, err := s.repo.FindAll(date, page, pageSize, search, lotId)
 	if err != nil {
 		return nil, appErrors.NewInternal("Lấy danh sách phiên gửi xe thất bại")
 	}

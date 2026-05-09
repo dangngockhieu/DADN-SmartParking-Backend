@@ -35,6 +35,7 @@ func (r *Repository) FindAll(
 	page int,
 	pageSize int,
 	search string,
+	lotId uint64,
 ) ([]ManageParkingSessionResponse, int64, error) {
 	if page < 1 {
 		page = 1
@@ -65,7 +66,8 @@ func (r *Repository) FindAll(
 			"parking_sessions.entry_time >= ? AND parking_sessions.entry_time < ?",
 			start,
 			end,
-		)
+		).
+		Where("parking_sessions.lot_id = ?", lotId)
 
 	// 2. Bổ sung điều kiện tìm kiếm nếu có
 	if search != "" {

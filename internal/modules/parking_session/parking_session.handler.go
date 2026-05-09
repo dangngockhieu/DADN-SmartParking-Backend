@@ -54,7 +54,13 @@ func (h *Handler) FindAll(c *gin.Context) {
 		return
 	}
 
-	result, err := h.service.FindAll(date, page, pageSize, search)
+	lotId, err := strconv.ParseUint(c.Query("lotId"), 10, 64)
+	if err != nil && c.Query("lotId") != "" {
+		c.Error(appErrors.NewBadRequest("lotId không hợp lệ"))
+		return
+	}
+
+	result, err := h.service.FindAll(date, page, pageSize, search, lotId)
 	if err != nil {
 		c.Error(err)
 		return
