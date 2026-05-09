@@ -11,6 +11,8 @@ Backend API cho hệ thống bãi xe thông minh, viết bằng Go, sử dụng 
   - RFID scan tại cổng vào/ra.
   - Sensor cập nhật trạng thái ô đỗ.
 - Phát sự kiện realtime trạng thái slot qua hub (WebTransport).
+- Dashboard thống kê lưu lượng xe, tỉ lệ lấp đầy theo bãi.
+- Ví điện tử + nạp tiền qua PayOS (deposit, webhook, cancel-return).
 - Tài liệu API qua Swagger.
 
 ## 2) Tech Stack
@@ -40,9 +42,10 @@ backend
 │   │   ├── token/              # Manage AccessToken and RefreshToken
 │   │   └── ...                 # Register, login, logout, refreshToken, resetPassword
 │   │
-│   ├── commmon/errors/         # Format_respone Error
+│   ├── common/errors/          # Format response error
 │   │
 │   ├── modules
+│   │   ├── dashboard/          # Thống kê lưu lượng xe
 │   │   ├── gate/               # Manage Gate CRUD
 │   │   ├── iot_device/         # Manage Iot_Device CRUD
 │   │   ├── iot_gateway/        # API camera and rfid_card post to server
@@ -50,8 +53,8 @@ backend
 │   │   ├── parking_session/    # Manage Parking_Session, caculator fee
 │   │   ├── parking_slot/       # CRUD Parking_slot, update status from sensor realtime
 │   │   ├── rfid_card/          # Manage Rfid_Card CRUD
-│   │   ├── slot_history/       # Sensor-Slot Mapping Management
-│   │   └── user/               # Create User, ChangePassword, ChangeRole, GetAllUser
+│   │   ├── user/               # Create User, ChangePassword, ChangeRole, GetAllUser
+│   │   └── wallet/             # Wallet + PayOS deposit
 │   │
 │   └── realtime/parking/       # Realtime hub/server
 │
@@ -62,7 +65,7 @@ backend
 │   ├── middleware/             # Auth, CORS, error handler
 │   └── response/               # Format Response API
 │
-├── template/email/             # Template Send Email
+├── templates/                  # Templates send email
 │
 └── ...                         # Env, README, ...
 ```
@@ -85,7 +88,7 @@ docker compose up -d
 
 Mặc định compose map MySQL ra cổng `3307`.
 
-Mở terminal trong doker và chạy câu lệnh sau để tạo db redis:
+Mở terminal trong docker và chạy câu lệnh sau để tạo db redis:
 
 ```bash
 docker run --name parking -p 6379:6379 -d redis
@@ -105,6 +108,7 @@ Ví dụ tối thiểu để chạy local:
 ```env
 APP_ENV=local
 APP_PORT=8080
+FRONTEND_URL=http://localhost:3000
 
 DB_HOST=127.0.0.1
 DB_PORT=
@@ -124,6 +128,14 @@ MAIL_USER=
 MAIL_PASS=
 VERIFY_URL=http://localhost:3000/verify
 CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+
+# PayOS
+PAYOS_CLIENT_ID=
+PAYOS_API_KEY=
+PAYOS_CHECKSUM_KEY=
+PAYOS_RETURN_URL=http://localhost:3000/wallet/return
+PAYOS_CANCEL_URL=http://localhost:3000/wallet/cancel
+PAYMENT_UPDATE_STATUS_CANCEL_URL=http://localhost:8080/api/v1/wallets/deposit/cancel-return
 ```
 
 ## 6) Khởi tạo database schema
@@ -237,10 +249,13 @@ Content-Type: application/json
 - `/api/v1/users`
 - `/api/v1/parking-lots`
 - `/api/v1/parking-slots`
+- `/api/v1/parking-sessions`
 - `/api/v1/gates`
 - `/api/v1/rfid-cards`
 - `/api/v1/iot-devices`
 - `/api/v1/iot` (camera, rfid)
+- `/api/v1/dashboard`
+- `/api/v1/wallets` (deposit, transactions, webhook)
 
 ## 11) Kiểm tra nhanh chất lượng code
 
@@ -251,8 +266,10 @@ go test ./...
 ## 12) Notes triển khai
 
 - Nếu muốn bật WebTransport server (`:4433`), cần cung cấp `cert.pem` và `key.pem` ở root project.
+- Có thể override đường dẫn TLS bằng `TLS_CERT` và `TLS_KEY`.
 - CORS được kiểm soát qua `CORS_ALLOWED_ORIGINS`.
 - `VERIFY_URL` là bắt buộc theo config loader.
+- `PAYMENT_UPDATE_STATUS_CANCEL_URL` là bắt buộc để cập nhật trạng thái khi hủy thanh toán PayOS.
 
 ## 13) Troubleshooting
 
