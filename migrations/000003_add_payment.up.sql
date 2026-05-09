@@ -44,3 +44,9 @@ ON wallet_transactions (created_at DESC, id DESC);
 
 CREATE INDEX idx_wallet_transactions_status_created_at
 ON wallet_transactions (status, created_at);
+
+UPDATE parking_sessions
+SET fee = ROUND(fee);
+
+ALTER TABLE parking_sessions
+MODIFY COLUMN fee BIGINT NOT NULL DEFAULT 0;
