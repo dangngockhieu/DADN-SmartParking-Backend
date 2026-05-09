@@ -39,3 +39,8 @@ type ParkingFlowResponse struct {
 	HourlyFlow []HourlyFlowResponse      `json:"hourlyFlow"`
 	Insights   DashboardInsightsResponse `json:"insights"`
 }
+
+type RevenueDateQuery struct {
+	LotID *uint64 `form:"lotId"`
+	Date  string  `form:"date" binding:"required"` // yyyy-mm-dd
+}

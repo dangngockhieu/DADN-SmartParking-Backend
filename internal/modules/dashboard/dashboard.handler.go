@@ -42,3 +42,35 @@ func (h *Handler) GetParkingFlow(c *gin.Context) {
 	}
 	response.Success(c, http.StatusOK, "Lấy thông tin lưu lượng xe thành công", result)
 }
+
+func (h *Handler) GetRevenueByMonth(c *gin.Context) {
+	var query RevenueDateQuery
+
+	if err := c.ShouldBindQuery(&query); err != nil {
+		_ = c.Error(appErrors.NewBadRequest("Query không hợp lệ"))
+		return
+	}
+
+	result, err := h.service.CountMonthlyRevenue(query.LotID, query.Date)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.Success(c, http.StatusOK, "Lấy thông tin doanh thu theo tháng thành công", gin.H{"revenue": result})
+}
+
+func (h *Handler) GetRevenueByDay(c *gin.Context) {
+	var query RevenueDateQuery
+
+	if err := c.ShouldBindQuery(&query); err != nil {
+		_ = c.Error(appErrors.NewBadRequest("Query không hợp lệ"))
+		return
+	}
+
+	result, err := h.service.CountDailyRevenue(query.LotID, query.Date)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.Success(c, http.StatusOK, "Lấy thông tin doanh thu theo ngày thành công", gin.H{"revenue": result})
+}

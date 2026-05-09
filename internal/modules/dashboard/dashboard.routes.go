@@ -10,6 +10,9 @@ func RegisterRoutes(
 ) {
 	group := router.Group("/dashboard")
 	group.Use(authMiddleware, adminOnly)
-
-	group.GET("/parking-flow", handler.GetParkingFlow)
+	{
+		group.GET("/parking-flow", handler.GetParkingFlow)
+		group.GET("/revenue-by-month", handler.GetRevenueByMonth)
+		group.GET("/revenue-by-day", handler.GetRevenueByDay)
+	}
 }

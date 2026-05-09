@@ -170,3 +170,20 @@ func (r *Repository) GetLotName(lotID uint64) (string, error) {
 
 	return name, nil
 }
+
+// Tổng doanh thu
+func (r *Repository) GetTotalRevenue(lotID *uint64, start time.Time, end time.Time) (int64, error) {
+	var total int64
+	db := r.db.Table("parking_sessions").
+		Select("COALESCE(SUM(fee), 0)").
+		Where("exit_time IS NOT NULL").
+		Where("exit_time >= ? AND exit_time < ?", start, end)
+
+	if lotID != nil {
+		db = db.Where("lot_id = ?", *lotID)
+	}
+	if err := db.Scan(&total).Error; err != nil {
+		return 0, err
+	}
+	return total, nil
+}

@@ -211,3 +211,67 @@ func (s *Service) getOccupancyStatusMessage(status string) string {
 		return "Bãi còn nhiều chỗ trống"
 	}
 }
+
+// Đếm doanh thu theo ngày cho bãi xe
+func (s *Service) CountDailyRevenue(lotID *uint64, date string) (int64, error) {
+	location, err := time.LoadLocation("Asia/Ho_Chi_Minh")
+	if err != nil {
+		location = time.Local
+	}
+
+	parsedDate, err := time.ParseInLocation("2006-01-02", date, location)
+	if err != nil {
+		return 0, appErrors.NewBadRequest("Date không hợp lệ, định dạng đúng là yyyy-mm-dd")
+	}
+
+	startOfDay := time.Date(
+		parsedDate.Year(),
+		parsedDate.Month(),
+		parsedDate.Day(),
+		0,
+		0,
+		0,
+		0,
+		location,
+	)
+	endOfDay := startOfDay.AddDate(0, 0, 1)
+
+	total, err := s.repo.GetTotalRevenue(lotID, startOfDay, endOfDay)
+	if err != nil {
+		return 0, appErrors.NewInternal("Thống kê doanh thu thất bại")
+	}
+	return total, nil
+}
+
+// Đếm doanh thu theo tháng cho bãi xe
+func (s *Service) CountMonthlyRevenue(lotID *uint64, date string) (int64, error) {
+	location, err := time.LoadLocation("Asia/Ho_Chi_Minh")
+	if err != nil {
+		location = time.Local
+	}
+
+	parsedDate, err := time.ParseInLocation("2006-01-02", date, location)
+	if err != nil {
+		return 0, appErrors.NewBadRequest("Date không hợp lệ, định dạng đúng là yyyy-mm-dd")
+	}
+
+	startOfMonth := time.Date(
+		parsedDate.Year(),
+		parsedDate.Month(),
+		1,
+		0,
+		0,
+		0,
+		0,
+		location,
+	)
+
+	endOfMonth := startOfMonth.AddDate(0, 1, 0)
+
+	total, err := s.repo.GetTotalRevenue(lotID, startOfMonth, endOfMonth)
+	if err != nil {
+		return 0, appErrors.NewInternal("Thống kê doanh thu thất bại")
+	}
+
+	return total, nil
+}

@@ -5,7 +5,7 @@ definitions:
       email:
         type: string
     required:
-    - email
+      - email
     type: object
   auth.LoginRequest:
     properties:
@@ -14,8 +14,8 @@ definitions:
       password:
         type: string
     required:
-    - email
-    - password
+      - email
+      - password
     type: object
   auth.RegisterRequest:
     properties:
@@ -29,10 +29,10 @@ definitions:
         minLength: 6
         type: string
     required:
-    - email
-    - first_name
-    - last_name
-    - password
+      - email
+      - first_name
+      - last_name
+      - password
     type: object
   auth.ResetPasswordRequest:
     properties:
@@ -46,10 +46,10 @@ definitions:
         minLength: 6
         type: string
     required:
-    - code
-    - confirm_password
-    - email
-    - new_password
+      - code
+      - confirm_password
+      - email
+      - new_password
     type: object
   gate.CreateGateRequest:
     properties:
@@ -63,24 +63,24 @@ definitions:
         type: string
       type:
         allOf:
-        - $ref: '#/definitions/gate.GateType'
+          - $ref: "#/definitions/gate.GateType"
         enum:
-        - ENTRY
-        - EXIT
+          - ENTRY
+          - EXIT
     required:
-    - lot_id
-    - mac_address
-    - name
-    - type
+      - lot_id
+      - mac_address
+      - name
+      - type
     type: object
   gate.GateType:
     enum:
-    - ENTRY
-    - EXIT
+      - ENTRY
+      - EXIT
     type: string
     x-enum-varnames:
-    - GateTypeEntry
-    - GateTypeExit
+      - GateTypeEntry
+      - GateTypeExit
   gate.UpdateGateRequest:
     properties:
       is_active:
@@ -93,10 +93,10 @@ definitions:
         type: string
       type:
         allOf:
-        - $ref: '#/definitions/gate.GateType'
+          - $ref: "#/definitions/gate.GateType"
         enum:
-        - ENTRY
-        - EXIT
+          - ENTRY
+          - EXIT
     type: object
   iot_device.CreateIoTDeviceRequest:
     properties:
@@ -107,8 +107,8 @@ definitions:
       mac_address:
         type: string
     required:
-    - device_name
-    - mac_address
+      - device_name
+      - mac_address
     type: object
   iot_gateway.CameraPlateRequest:
     properties:
@@ -117,8 +117,8 @@ definitions:
       plate_number:
         type: string
     required:
-    - gate_id
-    - plate_number
+      - gate_id
+      - plate_number
     type: object
   iot_gateway.CameraPlateResponse:
     properties:
@@ -136,9 +136,9 @@ definitions:
       rfid_uid:
         type: string
     required:
-    - gate_id
-    - mac_address
-    - rfid_uid
+      - gate_id
+      - mac_address
+      - rfid_uid
     type: object
   iot_gateway.RfidScanResponse:
     properties:
@@ -164,8 +164,8 @@ definitions:
       name:
         type: string
     required:
-    - location
-    - name
+      - location
+      - name
     type: object
   parking_lot.UpdateParkingLotRequest:
     properties:
@@ -177,9 +177,9 @@ definitions:
   parking_slot.AdminUpdateParkingSlotRequest:
     properties:
       status:
-        $ref: '#/definitions/parking_slot.SlotStatus'
+        $ref: "#/definitions/parking_slot.SlotStatus"
     required:
-    - status
+      - status
     type: object
   parking_slot.ChangeSlotDeviceRequest:
     properties:
@@ -188,8 +188,8 @@ definitions:
       port_number:
         type: integer
     required:
-    - device_mac
-    - port_number
+      - device_mac
+      - port_number
     type: object
   parking_slot.CreateParkingSlotRequest:
     properties:
@@ -202,10 +202,10 @@ definitions:
       port_number:
         type: integer
     required:
-    - device_mac
-    - lot_id
-    - name
-    - port_number
+      - device_mac
+      - lot_id
+      - name
+      - port_number
     type: object
   parking_slot.SensorUpdateParkingSlotRequest:
     properties:
@@ -216,32 +216,32 @@ definitions:
       port:
         type: integer
     required:
-    - is_occupied
-    - mac
-    - port
+      - is_occupied
+      - mac
+      - port
     type: object
   parking_slot.SlotStatus:
     enum:
-    - AVAILABLE
-    - OCCUPIED
-    - MAINTAIN
+      - AVAILABLE
+      - OCCUPIED
+      - MAINTAIN
     type: string
     x-enum-varnames:
-    - SlotStatusAvailable
-    - SlotStatusOccupied
-    - SlotStatusMaintain
+      - SlotStatusAvailable
+      - SlotStatusOccupied
+      - SlotStatusMaintain
   rfid_card.CardType:
     enum:
-    - REGISTERED
-    - GUEST
+      - REGISTERED
+      - GUEST
     type: string
     x-enum-varnames:
-    - CardTypeRegistered
-    - CardTypeGuest
+      - CardTypeRegistered
+      - CardTypeGuest
   rfid_card.CreateRfidCardRequest:
     properties:
       card_type:
-        $ref: '#/definitions/rfid_card.CardType'
+        $ref: "#/definitions/rfid_card.CardType"
       is_active:
         type: boolean
       owner_name:
@@ -249,13 +249,13 @@ definitions:
       uid:
         type: string
     required:
-    - card_type
-    - uid
+      - card_type
+      - uid
     type: object
   rfid_card.UpdateRfidCardRequest:
     properties:
       card_type:
-        $ref: '#/definitions/rfid_card.CardType'
+        $ref: "#/definitions/rfid_card.CardType"
       is_active:
         type: boolean
       owner_name:
@@ -274,16 +274,16 @@ definitions:
         minLength: 6
         type: string
     required:
-    - confirm_password
-    - new_password
-    - old_password
+      - confirm_password
+      - new_password
+      - old_password
     type: object
   user.ChangeRoleRequest:
     properties:
       new_role:
-        $ref: '#/definitions/user.Role'
+        $ref: "#/definitions/user.Role"
     required:
-    - new_role
+      - new_role
     type: object
   user.CreateUserRequest:
     properties:
@@ -297,24 +297,24 @@ definitions:
         minLength: 6
         type: string
       role:
-        $ref: '#/definitions/user.Role'
+        $ref: "#/definitions/user.Role"
     required:
-    - email
-    - first_name
-    - last_name
-    - password
-    - role
+      - email
+      - first_name
+      - last_name
+      - password
+      - role
     type: object
   user.Role:
     enum:
-    - USER
-    - MANAGER
-    - ADMIN
+      - USER
+      - MANAGER
+      - ADMIN
     type: string
     x-enum-varnames:
-    - RoleUser
-    - RoleManager
-    - RoleAdmin
+      - RoleUser
+      - RoleManager
+      - RoleAdmin
 host: localhost:8080
 info:
   contact: {}
@@ -325,17 +325,17 @@ paths:
   /auth/login:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Đăng nhập bằng email và mật khẩu
       parameters:
-      - description: Thông tin đăng nhập
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/auth.LoginRequest'
+        - description: Thông tin đăng nhập
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/auth.LoginRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -349,12 +349,12 @@ paths:
             type: object
       summary: Đăng nhập
       tags:
-      - auth
+        - auth
   /auth/logout:
     post:
       description: Đăng xuất tài khoản hiện tại và xóa refresh token cookie
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -367,15 +367,15 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+        - BearerAuth: []
       summary: Đăng xuất
       tags:
-      - auth
+        - auth
   /auth/refresh-token:
     post:
       description: Cấp lại access token từ refresh token trong cookie
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -389,21 +389,21 @@ paths:
             type: object
       summary: Làm mới access token
       tags:
-      - auth
+        - auth
   /auth/register:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Tạo tài khoản mới và gửi email xác thực
       parameters:
-      - description: Thông tin đăng ký
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/auth.RegisterRequest'
+        - description: Thông tin đăng ký
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/auth.RegisterRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
@@ -417,21 +417,21 @@ paths:
             type: object
       summary: Đăng ký tài khoản
       tags:
-      - auth
+        - auth
   /auth/resend:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Gửi lại email xác thực tài khoản
       parameters:
-      - description: Email người dùng
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/auth.EmailRequest'
+        - description: Email người dùng
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/auth.EmailRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -445,21 +445,21 @@ paths:
             type: object
       summary: Gửi lại email xác thực
       tags:
-      - auth
+        - auth
   /auth/reset-password:
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Đặt lại mật khẩu bằng mã xác thực hoặc token reset
       parameters:
-      - description: Thông tin đặt lại mật khẩu
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/auth.ResetPasswordRequest'
+        - description: Thông tin đặt lại mật khẩu
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/auth.ResetPasswordRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -473,21 +473,21 @@ paths:
             type: object
       summary: Đặt lại mật khẩu
       tags:
-      - auth
+        - auth
   /auth/send-reset-password:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Gửi email chứa hướng dẫn hoặc mã để đặt lại mật khẩu
       parameters:
-      - description: Email người dùng
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/auth.EmailRequest'
+        - description: Email người dùng
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/auth.EmailRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -501,23 +501,23 @@ paths:
             type: object
       summary: Gửi email đặt lại mật khẩu
       tags:
-      - auth
+        - auth
   /auth/verify:
     get:
       description: Xác thực tài khoản bằng email và mã code từ link gửi qua email
       parameters:
-      - description: Email
-        in: query
-        name: email
-        required: true
-        type: string
-      - description: Mã xác thực
-        in: query
-        name: code
-        required: true
-        type: string
+        - description: Email
+          in: query
+          name: email
+          required: true
+          type: string
+        - description: Mã xác thực
+          in: query
+          name: code
+          required: true
+          type: string
       produces:
-      - text/html
+        - text/html
       responses:
         "200":
           description: HTML verified page
@@ -530,20 +530,20 @@ paths:
             type: object
       summary: Xác thực email
       tags:
-      - auth
+        - auth
   /gates:
     post:
       consumes:
-      - application/json
+        - application/json
       parameters:
-      - description: Thông tin cổng
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/gate.CreateGateRequest'
+        - description: Thông tin cổng
+          in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/gate.CreateGateRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
@@ -556,20 +556,20 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+        - BearerAuth: []
       summary: Tạo cổng mới
       tags:
-      - gate
+        - gate
   /gates/{gateId}:
     delete:
       parameters:
-      - description: ID cổng
-        in: path
-        name: gateId
-        required: true
-        type: integer
+        - description: ID cổng
+          in: path
+          name: gateId
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -582,19 +582,19 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+        - BearerAuth: []
       summary: Xoá cổng
       tags:
-      - gate
+        - gate
     get:
       parameters:
-      - description: ID cổng
-        in: path
-        name: gateId
-        required: true
-        type: integer
+        - description: ID cổng
+          in: path
+          name: gateId
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -607,27 +607,27 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+        - BearerAuth: []
       summary: Lấy thông tin cổng theo ID
       tags:
-      - gate
+        - gate
     put:
       consumes:
-      - application/json
+        - application/json
       parameters:
-      - description: ID cổng
-        in: path
-        name: gateId
-        required: true
-        type: integer
-      - description: Thông tin cập nhật
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/gate.UpdateGateRequest'
+        - description: ID cổng
+          in: path
+          name: gateId
+          required: true
+          type: integer
+        - description: Thông tin cập nhật
+          in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/gate.UpdateGateRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -640,24 +640,24 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+        - BearerAuth: []
       summary: Cập nhật thông tin cổng
       tags:
-      - gate
+        - gate
   /iot-devices:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Tạo mới một thiết bị IoT trong hệ thống
       parameters:
-      - description: Thông tin thiết bị IoT
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/iot_device.CreateIoTDeviceRequest'
+        - description: Thông tin thiết bị IoT
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/iot_device.CreateIoTDeviceRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
@@ -675,29 +675,29 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+        - BearerAuth: []
       summary: Tạo thiết bị IoT
       tags:
-      - iot_device
+        - iot_device
   /iot/camera:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Lưu biển số tạm thời theo gate để chờ RFID scan consume
       parameters:
-      - description: Dữ liệu từ camera
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/iot_gateway.CameraPlateRequest'
+        - description: Dữ liệu từ camera
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/iot_gateway.CameraPlateRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/iot_gateway.CameraPlateResponse'
+            $ref: "#/definitions/iot_gateway.CameraPlateResponse"
         "400":
           description: Bad Request
           schema:
@@ -705,26 +705,26 @@ paths:
             type: object
       summary: Camera AI gửi biển số
       tags:
-      - iot
+        - iot
   /iot/rfid:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Xử lý sự kiện quẹt thẻ từ ESP32+RC522, quyết định mở/đóng barie
       parameters:
-      - description: Dữ liệu từ ESP32
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/iot_gateway.RfidScanRequest'
+        - description: Dữ liệu từ ESP32
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/iot_gateway.RfidScanRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/iot_gateway.RfidScanResponse'
+            $ref: "#/definitions/iot_gateway.RfidScanResponse"
         "400":
           description: Bad Request
           schema:
@@ -732,12 +732,12 @@ paths:
             type: object
       summary: ESP32 quẹt thẻ RFID
       tags:
-      - iot
+        - iot
   /parking-lots:
     get:
       description: Trả về toàn bộ danh sách bãi đỗ xe
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -750,23 +750,23 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+        - BearerAuth: []
       summary: Lấy danh sách bãi đỗ xe
       tags:
-      - parking_lot
+        - parking_lot
     post:
       consumes:
-      - application/json
+        - application/json
       description: Tạo mới một bãi đỗ xe trong hệ thống
       parameters:
-      - description: Thông tin bãi đỗ xe
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/parking_lot.CreateParkingLotRequest'
+        - description: Thông tin bãi đỗ xe
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/parking_lot.CreateParkingLotRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
@@ -784,21 +784,21 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+        - BearerAuth: []
       summary: Tạo bãi đỗ xe
       tags:
-      - parking_lot
+        - parking_lot
   /parking-lots/{id}:
     get:
       description: Lấy thông tin chi tiết của một bãi đỗ xe theo ID
       parameters:
-      - description: ID bãi đỗ xe
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: ID bãi đỗ xe
+          in: path
+          name: id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -816,28 +816,28 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+        - BearerAuth: []
       summary: Lấy chi tiết bãi đỗ xe
       tags:
-      - parking_lot
+        - parking_lot
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Cập nhật thông tin bãi đỗ xe theo ID
       parameters:
-      - description: ID bãi đỗ xe
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Thông tin cập nhật bãi đỗ xe
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/parking_lot.UpdateParkingLotRequest'
+        - description: ID bãi đỗ xe
+          in: path
+          name: id
+          required: true
+          type: integer
+        - description: Thông tin cập nhật bãi đỗ xe
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/parking_lot.UpdateParkingLotRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -855,20 +855,20 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+        - BearerAuth: []
       summary: Cập nhật bãi đỗ xe
       tags:
-      - parking_lot
+        - parking_lot
   /parking-lots/{id}/gates:
     get:
       parameters:
-      - description: ID bãi đỗ xe
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: ID bãi đỗ xe
+          in: path
+          name: id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -881,15 +881,15 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+        - BearerAuth: []
       summary: Lấy danh sách cổng theo bãi đỗ
       tags:
-      - parking_lot
+        - parking_lot
   /parking-sessions:
     get:
       description: Trả về danh sách tất cả phiên gửi xe
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -903,18 +903,18 @@ paths:
             type: object
       summary: Lấy danh sách phiên gửi xe
       tags:
-      - parking_session
+        - parking_session
   /parking-sessions/{id}:
     delete:
       description: Đóng phiên gửi xe theo ID, dùng cho testing
       parameters:
-      - description: ID phiên gửi xe
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: ID phiên gửi xe
+          in: path
+          name: id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -928,17 +928,17 @@ paths:
             type: object
       summary: Đóng phiên gửi xe theo ID (test)
       tags:
-      - parking_session
+        - parking_session
     get:
       description: Lấy thông tin phiên gửi xe theo ID
       parameters:
-      - description: ID phiên gửi xe
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: ID phiên gửi xe
+          in: path
+          name: id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -952,18 +952,18 @@ paths:
             type: object
       summary: Lấy chi tiết phiên gửi xe
       tags:
-      - parking_session
+        - parking_session
   /parking-sessions/card/{uid}:
     delete:
       description: Đóng phiên gửi xe đang active theo UID thẻ, dùng cho testing
       parameters:
-      - description: UID thẻ
-        in: path
-        name: uid
-        required: true
-        type: string
+        - description: UID thẻ
+          in: path
+          name: uid
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -977,18 +977,18 @@ paths:
             type: object
       summary: Đóng phiên gửi xe theo UID thẻ (test)
       tags:
-      - parking_session
+        - parking_session
   /parking-sessions/purge/{id}:
     delete:
       description: Xóa vĩnh viễn phiên gửi xe khỏi DB
       parameters:
-      - description: ID phiên gửi xe
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: ID phiên gửi xe
+          in: path
+          name: id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1002,21 +1002,21 @@ paths:
             type: object
       summary: Xóa vĩnh viễn phiên gửi xe
       tags:
-      - parking_session
+        - parking_session
   /parking-slots:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Tạo mới một vị trí đỗ xe trong hệ thống
       parameters:
-      - description: Thông tin vị trí đỗ xe
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/parking_slot.CreateParkingSlotRequest'
+        - description: Thông tin vị trí đỗ xe
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/parking_slot.CreateParkingSlotRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
@@ -1034,21 +1034,21 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+        - BearerAuth: []
       summary: Tạo vị trí đỗ xe
       tags:
-      - parking_slot
+        - parking_slot
   /parking-slots/{id}:
     get:
       description: Lấy thông tin chi tiết của một vị trí đỗ xe theo ID
       parameters:
-      - description: ID vị trí đỗ xe
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: ID vị trí đỗ xe
+          in: path
+          name: id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1066,29 +1066,29 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+        - BearerAuth: []
       summary: Lấy chi tiết vị trí đỗ xe
       tags:
-      - parking_slot
+        - parking_slot
   /parking-slots/{id}/device:
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Cập nhật hoặc thay đổi thiết bị IoT gắn với vị trí đỗ xe theo ID
       parameters:
-      - description: ID vị trí đỗ xe
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Thông tin thiết bị mới
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/parking_slot.ChangeSlotDeviceRequest'
+        - description: ID vị trí đỗ xe
+          in: path
+          name: id
+          required: true
+          type: integer
+        - description: Thông tin thiết bị mới
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/parking_slot.ChangeSlotDeviceRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1106,30 +1106,31 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+        - BearerAuth: []
       summary: Đổi thiết bị cho vị trí đỗ
       tags:
-      - parking_slot
+        - parking_slot
   /parking-slots/admin/{id}:
     patch:
       consumes:
-      - application/json
-      description: Cập nhật trạng thái vị trí đỗ xe theo ID bởi quản trị viên hoặc
+        - application/json
+      description:
+        Cập nhật trạng thái vị trí đỗ xe theo ID bởi quản trị viên hoặc
         quản lý
       parameters:
-      - description: ID vị trí đỗ xe
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Thông tin cập nhật trạng thái
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/parking_slot.AdminUpdateParkingSlotRequest'
+        - description: ID vị trí đỗ xe
+          in: path
+          name: id
+          required: true
+          type: integer
+        - description: Thông tin cập nhật trạng thái
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/parking_slot.AdminUpdateParkingSlotRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1147,24 +1148,24 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+        - BearerAuth: []
       summary: Quản trị viên cập nhật trạng thái vị trí đỗ
       tags:
-      - parking_slot
+        - parking_slot
   /parking-slots/sensor:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Cập nhật trạng thái vị trí đỗ xe từ cảm biến hoặc thiết bị IoT
       parameters:
-      - description: Dữ liệu trạng thái từ cảm biến
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/parking_slot.SensorUpdateParkingSlotRequest'
+        - description: Dữ liệu trạng thái từ cảm biến
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/parking_slot.SensorUpdateParkingSlotRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1178,21 +1179,21 @@ paths:
             type: object
       summary: Thiết bị cảm biến cập nhật trạng thái vị trí đỗ
       tags:
-      - parking_slot
+        - parking_slot
   /rfid-cards:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Tạo mới thẻ RFID trong hệ thống
       parameters:
-      - description: Thông tin thẻ RFID
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/rfid_card.CreateRfidCardRequest'
+        - description: Thông tin thẻ RFID
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/rfid_card.CreateRfidCardRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
@@ -1210,29 +1211,29 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+        - BearerAuth: []
       summary: Tạo thẻ RFID
       tags:
-      - rfid_card
+        - rfid_card
   /rfid-cards/{id}:
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Cập nhật thông tin thẻ RFID theo ID
       parameters:
-      - description: ID thẻ RFID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Thông tin cập nhật
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/rfid_card.UpdateRfidCardRequest'
+        - description: ID thẻ RFID
+          in: path
+          name: id
+          required: true
+          type: integer
+        - description: Thông tin cập nhật
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/rfid_card.UpdateRfidCardRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1250,21 +1251,21 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+        - BearerAuth: []
       summary: Cập nhật thẻ RFID
       tags:
-      - rfid_card
+        - rfid_card
   /slot-histories/{slotId}:
     get:
       description: Trả về lịch sử hoạt động của một vị trí đỗ xe theo slot ID
       parameters:
-      - description: ID vị trí đỗ xe
-        in: path
-        name: slotId
-        required: true
-        type: integer
+        - description: ID vị trí đỗ xe
+          in: path
+          name: slotId
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1282,30 +1283,30 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+        - BearerAuth: []
       summary: Lấy lịch sử theo vị trí đỗ
       tags:
-      - slot_history
+        - slot_history
   /users:
     get:
       description: Lấy danh sách người dùng có phân trang và tìm kiếm
       parameters:
-      - default: 1
-        description: Trang hiện tại
-        in: query
-        name: page
-        type: integer
-      - default: 10
-        description: Số lượng mỗi trang
-        in: query
-        name: limit
-        type: integer
-      - description: Từ khóa tìm kiếm
-        in: query
-        name: search
-        type: string
+        - default: 1
+          description: Trang hiện tại
+          in: query
+          name: page
+          type: integer
+        - default: 10
+          description: Số lượng mỗi trang
+          in: query
+          name: limit
+          type: integer
+        - description: Từ khóa tìm kiếm
+          in: query
+          name: search
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1318,23 +1319,23 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+        - BearerAuth: []
       summary: Lấy danh sách người dùng
       tags:
-      - user
+        - user
     post:
       consumes:
-      - application/json
+        - application/json
       description: Tạo mới người dùng bởi quản trị viên
       parameters:
-      - description: Thông tin người dùng
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/user.CreateUserRequest'
+        - description: Thông tin người dùng
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/user.CreateUserRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
@@ -1352,24 +1353,24 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+        - BearerAuth: []
       summary: Admin tạo người dùng
       tags:
-      - user
+        - user
   /users/change-password:
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Người dùng hiện tại đổi mật khẩu của chính mình
       parameters:
-      - description: Thông tin đổi mật khẩu
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/user.ChangePasswordRequest'
+        - description: Thông tin đổi mật khẩu
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/user.ChangePasswordRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1387,29 +1388,29 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+        - BearerAuth: []
       summary: Đổi mật khẩu
       tags:
-      - user
+        - user
   /users/change-role/{id}:
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Quản trị viên đổi vai trò của người dùng theo ID
       parameters:
-      - description: ID người dùng
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Vai trò mới
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/user.ChangeRoleRequest'
+        - description: ID người dùng
+          in: path
+          name: id
+          required: true
+          type: integer
+        - description: Vai trò mới
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/user.ChangeRoleRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1427,10 +1428,10 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+        - BearerAuth: []
       summary: Đổi vai trò người dùng
       tags:
-      - user
+        - user
 securityDefinitions:
   BearerAuth:
     in: header
