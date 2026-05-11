@@ -61,7 +61,7 @@ func (r *Repository) FindAll(
 	// 1. Khởi tạo query cơ bản (CHƯA có Select)
 	base := r.db.Model(&ParkingSession{}).
 		Joins("JOIN rfid_cards ON rfid_cards.uid = parking_sessions.card_uid").
-		Joins("JOIN users ON users.id = rfid_cards.user_id").
+		Joins("LEFT JOIN users ON users.id = rfid_cards.user_id").
 		Where(
 			"parking_sessions.entry_time >= ? AND parking_sessions.entry_time < ?",
 			start,
@@ -96,7 +96,7 @@ func (r *Repository) FindAll(
 			parking_sessions.exit_time,
 			parking_sessions.fee,
 			parking_sessions.is_active,
-			CONCAT(users.last_name, ' ', users.first_name) AS owner_name
+			COALESCE(CONCAT(users.last_name, ' ', users.first_name), 'Khách vãng lai') AS owner_name
 		`).
 		Order("exit_time DESC").
 		Offset(offset).

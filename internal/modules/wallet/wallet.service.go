@@ -75,7 +75,7 @@ func (s *Service) CreateDeposit(ctx context.Context, userID uint64, req CreateDe
 		}
 
 		itemID = item.ID
-		orderCode = uint64(10000000) + item.ID
+		orderCode = uint64(10000100) + item.ID
 
 		if err := s.repo.UpdateOrderCode(ctx, tx, item.ID, orderCode); err != nil {
 			return err
