@@ -1,0 +1,107 @@
+<mxfile host="65bd71144e">
+    <diagram name="Option 2 - MQTT Batch + Worker" id="opt2">
+        <mxGraphModel dx="905" dy="621" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title" value="Option 2: MQTT Batch + Worker" style="text;html=1;fontSize=18;fontStyle=1;align=center;fillColor=none;strokeColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="400" y="20" width="400" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="sensor_label" value="Sensor Flow (telemetry async)" style="text;html=1;fontSize=12;fontStyle=2;fillColor=none;strokeColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="65" width="250" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="esp_sensor" value="ESP32 Sensor Board&#10;&#10;- Đọc SR04 mỗi 200-500ms&#10;- Debounce 3-5 lần&#10;- Gom batch event đã thay đổi&#10;- Gửi mỗi 1-5s hoặc khi đủ event&#10;- Heartbeat mỗi 30-60s" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="90" width="230" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="mqtt_pub" value="MQTT Publish&#10;&#10;Topic: parking/{lot_id}/sensor/{mac}/batch&#10;QoS 1 (at least once)&#10;Payload: { mac, sequence, events[] }" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="250" width="230" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="broker" value="MQTT Broker&#10;(Mosquitto / EMQX)&#10;&#10;- Nhận message từ N thiết bị&#10;- Giữ message khi subscriber down&#10;- Chuyển tiếp cho worker" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="380" width="230" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="worker" value="Sensor Worker (Go goroutine)&#10;&#10;- Subscribe parking/+/sensor/+/batch&#10;- Gom event trong cửa sổ 1-5s&#10;- Gộp event trùng (giữ cuối cùng)&#10;- So sánh với Redis latest state&#10;- Chỉ ghi DB khi trạng thái lệch&#10;- Batch UPDATE MySQL&#10;- Push realtime cho frontend" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="520" width="230" height="150" as="geometry"/>
+                </mxCell>
+                <mxCell id="gate_label" value="Gate Flow (command sync)" style="text;html=1;fontSize=12;fontStyle=2;fillColor=none;strokeColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="530" y="65" width="250" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="esp_gate" value="ESP32 Gate Board&#10;&#10;- Camera chụp biển số&#10;- RFID quét thẻ&#10;- Servo barie + LCD + RGB LED&#10;- HTTP blocking chờ response" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                    <mxGeometry x="530" y="90" width="230" height="105" as="geometry"/>
+                </mxCell>
+                <mxCell id="http_api" value="HTTP IoT API (Gin)&#10;&#10;POST /iot/camera → lưu PlateCache&#10;POST /iot/rfid → xử lý nghiệp vụ" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                    <mxGeometry x="530" y="250" width="230" height="75" as="geometry"/>
+                </mxCell>
+                <mxCell id="iot_svc" value="IoT Service&#10;&#10;- Validate gate, card, plate&#10;- ENTRY: INSERT session&#10;- EXIT: tính phí + trừ ví&#10;  (SELECT FOR UPDATE)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                    <mxGeometry x="530" y="370" width="230" height="105" as="geometry"/>
+                </mxCell>
+                <mxCell id="response" value="HTTP Response → ESP32&#10;&#10;{ action, lcd_line1, lcd_line2 }&#10;→ mở barie / reject" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                    <mxGeometry x="530" y="520" width="230" height="75" as="geometry"/>
+                </mxCell>
+                <mxCell id="redis" value="Redis&lt;br&gt;&lt;br&gt;- Slot latest state (slot:{mac}:{port})&lt;br&gt;- PlateCache (plate:{gate_id})&lt;br&gt;- Auth t" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                    <mxGeometry x="310" y="430" width="180" height="95" as="geometry"/>
+                </mxCell>
+                <mxCell id="mysql" value="MySQL&#10;&#10;- parking_slots (batch UPDATE)&#10;- parking_sessions&#10;- users, rfid_cards&#10;- wallet_transactions" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                    <mxGeometry x="310" y="700" width="180" height="105" as="geometry"/>
+                </mxCell>
+                <mxCell id="hub" value="ParkingHub / WebTransport&#10;&#10;Broadcast slot status change&#10;→ Frontend realtime" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                    <mxGeometry x="310" y="570" width="180" height="75" as="geometry"/>
+                </mxCell>
+                <mxCell id="frontend" value="Frontend (React)&#10;&#10;Sơ đồ bãi đỗ realtime" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                    <mxGeometry x="310" y="850" width="180" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="a1" value="MQTT batch" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" parent="1" source="esp_sensor" target="mqtt_pub" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a2" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="mqtt_pub" target="broker" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a3" value="subscribe" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" parent="1" source="broker" target="worker" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a4" value="đọc/ghi&#10;latest state" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" parent="1" source="worker" target="redis" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a5" value="batch UPDATE" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" parent="1" source="worker" target="mysql" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="145" y="690"/>
+                            <mxPoint x="310" y="690"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="a6" value="push event" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" parent="1" source="worker" target="hub" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="270" y="595"/>
+                            <mxPoint x="270" y="607"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="b1" value="HTTP POST" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" parent="1" source="esp_gate" target="http_api" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="b2" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="http_api" target="iot_svc" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="b3" value="response" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" parent="1" source="iot_svc" target="response" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="b4" value="PlateCache&#10;đọc/ghi" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" parent="1" source="http_api" target="redis" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="b5" value="session / wallet" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" parent="1" source="iot_svc" target="mysql" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="645" y="490"/>
+                            <mxPoint x="800" y="490"/>
+                            <mxPoint x="800" y="752"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="c1" value="WebTransport push" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" parent="1" source="hub" target="frontend" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

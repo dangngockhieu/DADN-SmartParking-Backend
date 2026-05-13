@@ -34,6 +34,17 @@ go.work.sum
 # vendor/ # Bỏ comment dòng này nếu bạn không muốn push thư mục vendor lên git (khuyên dùng khi dùng Go Modules)
 
 # =========================
+# Python async IoT gateway
+# =========================
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# =========================
 # IDEs and Editors
 # =========================
 .idea/
