@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -13,7 +15,6 @@ import (
 	"backend/internal/modules/dashboard"
 	"backend/internal/modules/gate"
 	"backend/internal/modules/iot_device"
-	"backend/internal/modules/iot_gateway"
 	"backend/internal/modules/parking_lot"
 	"backend/internal/modules/parking_session"
 	"backend/internal/modules/parking_slot"
@@ -57,6 +58,79 @@ func getCertPaths() (certPath, keyPath string) {
 	return certPath, keyPath
 }
 
+// slotChangeItem là struct cho 1 event thay đổi slot (dùng trong bridge).
+type slotChangeItem struct {
+	Changed   bool   `json:"changed"`
+	ID        uint64 `json:"id"`
+	LotID     uint64 `json:"lot_id"`
+	Name      string `json:"name"`
+	OldStatus string `json:"old_status"`
+	NewStatus string `json:"new_status"`
+	Message   string `json:"message"`
+}
+
+// startRealtimeBridge subscribes Redis pub/sub channel "iot:parking:slot_status_changed"
+// và forward events từ Python Worker → ParkingHub → WebTransport → Frontend.
+//
+// Tối ưu: group events theo lotID → gửi batch 1 lần per lot (giảm lock + send).
+// Luồng: Python Sensor Worker → Redis PubSub → Go Bridge → ParkingHub.BroadcastBatchToLot → Frontend
+func startRealtimeBridge(redisClient *database.RedisClient, hub *parking.Hub) {
+	go func() {
+		ctx := context.Background()
+		pubsub := redisClient.Client.Subscribe(ctx, "iot:parking:slot_status_changed")
+		defer pubsub.Close()
+
+		log.Println("[BRIDGE] subscribed to Redis channel: iot:parking:slot_status_changed")
+
+		ch := pubsub.Channel()
+		for msg := range ch {
+			var envelope struct {
+				Event string `json:"event"`
+				Data  []struct {
+					ID        uint64 `json:"id"`
+					LotID     uint64 `json:"lot_id"`
+					Name      string `json:"name"`
+					OldStatus string `json:"old_status"`
+					NewStatus string `json:"new_status"`
+				} `json:"data"`
+			}
+
+			if err := json.Unmarshal([]byte(msg.Payload), &envelope); err != nil {
+				log.Printf("[BRIDGE] invalid JSON from Redis: %v", err)
+				continue
+			}
+
+			if envelope.Event != "SLOT_STATUS_CHANGE_BATCH" || len(envelope.Data) == 0 {
+				continue
+			}
+
+			// Group events theo lotID → giảm số lần broadcast từ N events → M lots
+			byLot := make(map[uint64][]slotChangeItem)
+			for _, item := range envelope.Data {
+				byLot[item.LotID] = append(byLot[item.LotID], slotChangeItem{
+					Changed:   true,
+					ID:        item.ID,
+					LotID:     item.LotID,
+					Name:      item.Name,
+					OldStatus: item.OldStatus,
+					NewStatus: item.NewStatus,
+					Message:   "Cập nhật từ sensor",
+				})
+			}
+
+			// Gửi batch cho mỗi lot (1 lần lock + 1 lần send per client per lot)
+			for lotID, events := range byLot {
+				hub.BroadcastBatchToLot(lotID, "SLOT_STATUS_CHANGE_BATCH", events)
+			}
+
+			log.Printf("[BRIDGE] forwarded %d slot changes across %d lots (hub: %d clients, %d rooms)",
+				len(envelope.Data), len(byLot), hub.ClientCount(), hub.RoomCount())
+		}
+
+		log.Println("[BRIDGE] Redis subscription ended")
+	}()
+}
+
 func main() {
 	// Load giá trị từ file .env
 	cfg := configs.LoadConfig()
@@ -90,13 +164,6 @@ func main() {
 	parkingSlotModule := parking_slot.NewModule(db, parkingHub)
 
 	parkingSessionModule := parking_session.NewModule(db)
-	iotGatewayModule := iot_gateway.NewModule(
-		gateModule.Service,
-		rfidCardModule.Service,
-		parkingSessionModule.Service,
-		parkingSlotModule.Service,
-		userModule.Service,
-	)
 
 	// Khởi động WebTransport server
 	certPath, keyPath := getCertPaths()
@@ -119,6 +186,9 @@ func main() {
 			log.Printf("[WT] server stopped: %v", err)
 		}
 	}()
+
+	// Khởi động Redis Bridge: Python Worker → Redis PubSub → ParkingHub → WebTransport → Frontend
+	startRealtimeBridge(redisClient, parkingHub)
 
 	r := gin.New()
 
@@ -150,7 +220,6 @@ func main() {
 	iot_device.RegisterRoutes(api, iotDeviceModule.Handler, authMiddleware, adminOnly)
 	parking_lot.RegisterRoutes(api, parkingLotModule.Handler, authMiddleware, adminOnly)
 	parking_slot.RegisterRoutes(api, parkingSlotModule.Handler, authMiddleware, adminOnly)
-	iot_gateway.RegisterRoutes(api, iotGatewayModule.Handler)
 	gate.RegisterRoutes(api, gateModule.Handler, authMiddleware, adminOnly)
 	user.RegisterRoutes(api, userModule.Handler, authMiddleware, adminOnly)
 	rfid_card.RegisterRoutes(api, rfidCardModule.Handler, authMiddleware, adminOnly)
